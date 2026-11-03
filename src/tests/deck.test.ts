@@ -16,7 +16,8 @@ describe('Deck Engine & Card Math (52-Card Solitaire Crawl)', () => {
     const ids = new Set(deck.map((c) => c.id));
     expect(ids.size).toBe(52);
 
-    // Verify 13 cards per suit
+    // Verify 13 ranks and 13 cards per suit
+    expect(RANKS.length).toBe(13);
     for (const suit of SUITS) {
       const suitCards = deck.filter((c) => c.suit === suit);
       expect(suitCards.length).toBe(13);
