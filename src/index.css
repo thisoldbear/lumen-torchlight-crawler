@@ -1,0 +1,170 @@
+:root {
+  /* High-Contrast Vibrant 3-Bit (8-Color) Palette */
+  --c-black: #0a0d14;
+  --c-blue: #1c62e8;
+  --c-green: #00cc44;
+  --c-cyan: #00e5e5;
+  --c-red: #f02538;
+  --c-magenta: #e028a0;
+  --c-yellow: #ffcc00;
+  --c-white: #ffffff;
+
+  /* UI Tokens - Clean, bright, high-contrast */
+  --c-bg: #0f1320;
+  --c-panel-bg: #181f33;
+  --c-border: #ffffff;
+  --c-border-dark: #3a4768;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  image-rendering: pixelated;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--c-bg);
+  color: var(--c-white);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* 3-Bit Pixel Panel */
+.pixel-panel {
+  background-color: var(--c-panel-bg);
+  border: 4px solid var(--c-white);
+  box-shadow: 
+    4px 4px 0px #000,
+    inset 2px 2px 0px rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.pixel-panel.yellow {
+  border-color: var(--c-yellow);
+}
+
+.pixel-panel.red {
+  border-color: var(--c-red);
+}
+
+.pixel-panel.cyan {
+  border-color: var(--c-cyan);
+}
+
+/* 3-Bit Arcade Buttons (Pure flat solid colors, no stripes, no scanlines) */
+.pixel-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--c-white);
+  background: var(--c-blue) !important;
+  border: 3px solid var(--c-white);
+  padding: 8px 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #000;
+  transition: all 0.05s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  position: relative;
+  z-index: 10;
+  background-image: none !important;
+}
+
+.pixel-btn:hover {
+  filter: brightness(1.15);
+}
+
+.pixel-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #000;
+}
+
+.pixel-btn:disabled {
+  background: #3a3f50 !important;
+  color: #777e92;
+  border-color: #555c70;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 0 #000;
+  background-image: none !important;
+}
+
+.pixel-btn.btn-red {
+  background: var(--c-red) !important;
+}
+
+.pixel-btn.btn-green {
+  background: var(--c-green) !important;
+}
+
+.pixel-btn.btn-yellow {
+  background: var(--c-yellow) !important;
+  color: var(--c-black);
+}
+
+.pixel-btn.btn-cyan {
+  background: var(--c-cyan) !important;
+  color: var(--c-black);
+}
+
+/* Suit Color Helper Classes */
+.text-spades { color: #d0d5dd; }
+.text-clubs { color: var(--c-green); }
+.text-diamonds { color: var(--c-cyan); }
+.text-hearts { color: var(--c-red); }
+
+/* Meter Bars */
+.pixel-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.pixel-bar-track {
+  flex: 1;
+  height: 14px;
+  background-color: #1a1e28;
+  border: 2px solid var(--c-white);
+  position: relative;
+  overflow: hidden;
+}
+
+.pixel-bar-fill {
+  height: 100%;
+  transition: width 0.2s ease;
+}
+
+.pixel-bar-fill.hp { background-color: var(--c-red); }
+.pixel-bar-fill.torch { background-color: var(--c-yellow); }
+.pixel-bar-fill.xp { background-color: var(--c-cyan); }
+
+/* Animations */
+@keyframes flicker {
+  0% { opacity: 0.95; }
+  50% { opacity: 1; }
+  100% { opacity: 0.88; }
+}
+
+.flicker {
+  animation: flicker 0.15s infinite;
+}
+
+@keyframes pulseBorder {
+  0%, 100% { border-color: var(--c-yellow); }
+  50% { border-color: var(--c-white); }
+}
+
+.pulse-yellow {
+  animation: pulseBorder 0.8s infinite;
+}
