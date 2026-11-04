@@ -87,6 +87,9 @@ Take the 9 cards for the current floor and lay them out in a **3x3 face-down gri
      $$\text{Damage Taken} = \max(1, \text{Monster Attack} - \text{Equipped Armor DEF})$$
   4. *Repeat* rounds until one falls, or take tactical actions (drink a potion, cast Torch Flare at Lvl 4, or flee).
   5. *Tactical Retreat:* You may spend 1 Torch and take 2 direct recoil damage to flee back to your previous tile.
+  6. *Strategy — Fight vs. Flee:*
+     - **Fight for Growth:** Monsters are your only source of XP to level up, gain Max HP, unlock natural DEF, and prepare for The Underlord. Defeating a monster also clears the chamber for safe transit.
+     - **Flee as an Emergency Brake:** Fleeing incurs a fixed $-1\text{ Torch}$ and $-2\text{ HP}$ penalty. If you blunder into a lethal high-rank monster early on (e.g. King ♠), taking the flat recoil to retreat and find alternate routes (potions, equipment, or timber) is far better than losing your run.
 
 #### ♣ Clubs — Hazards & Timber Salvage
 - **Trap Damage:** Take $\max(1, \lfloor \text{Rank} / 2 \rfloor - \text{Armor DEF})$ direct damage.

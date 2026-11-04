@@ -139,6 +139,7 @@ export const DraftModal: React.FC<DraftModalProps> = ({ draftCards, onSelectCard
               <div>• <span style={{ color: 'var(--c-cyan)' }}>HERO STRIKE:</span> Choosing <b>Attack</b> strikes the monster first. If the monster dies from your blow, it is slain instantly and cannot hit back!</div>
               <div>• <span style={{ color: 'var(--c-red)' }}>MONSTER POWER:</span> Monster ATK is scaled to ⌈Rank / 2⌉ (HP = full rank). Surviving foes counter-attack for Monster ATK − Your DEF (min 1).</div>
               <div>• <span style={{ color: 'var(--c-green)' }}>TACTICAL OPTIONS:</span> Drink a Potion (+8 HP without triggering retaliation), Flee (-1🕯️, -2 HP), or cast Torch Flare (Lvl 4).</div>
+              <div>• <span style={{ color: 'var(--c-yellow)' }}>FIGHT VS. FLEE:</span> Fighting is your only path to XP, levels, and tile clearance. However, <b>Fleeing</b> costs a flat 1 Torch & 2 HP—an invaluable emergency brake if a high-rank foe would otherwise kill you!</div>
             </div>
 
             {/* Leveling */}
