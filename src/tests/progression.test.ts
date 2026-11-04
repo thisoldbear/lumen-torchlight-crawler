@@ -3,6 +3,7 @@ import {
   evaluateLevelUp,
   calculateLegacyScore,
   isOrthogonallyAdjacent,
+  calculateFloorTransitionHeal,
 } from '../utils/rules';
 
 describe('Progression, Scoring & Navigation Hardening', () => {
@@ -109,6 +110,38 @@ describe('Progression, Scoring & Navigation Hardening', () => {
     it('returns false for current tile or distant tiles', () => {
       expect(isOrthogonallyAdjacent(1, 1, 1, 1)).toBe(false); // Same tile
       expect(isOrthogonallyAdjacent(0, 0, 2, 2)).toBe(false); // Far tile
+    });
+  });
+
+  describe('calculateFloorTransitionHeal Rules', () => {
+    it('restores health back to full when descending into a new floor', () => {
+      const res = calculateFloorTransitionHeal(10, 20);
+      expect(res.newHp).toBe(20);
+      expect(res.healed).toBe(10);
+    });
+
+    it('heals the exact difference when HP is partially depleted', () => {
+      const res = calculateFloorTransitionHeal(17, 20);
+      expect(res.newHp).toBe(20);
+      expect(res.healed).toBe(3);
+    });
+
+    it('does not overheal or report positive heal if already at full HP', () => {
+      const res = calculateFloorTransitionHeal(20, 20);
+      expect(res.newHp).toBe(20);
+      expect(res.healed).toBe(0);
+    });
+
+    it('safely handles higher maxHp values from level ups and blessings', () => {
+      const res = calculateFloorTransitionHeal(12, 34);
+      expect(res.newHp).toBe(34);
+      expect(res.healed).toBe(22);
+    });
+
+    it('handles negative or zero HP boundary conditions safely', () => {
+      const res = calculateFloorTransitionHeal(-5, 20);
+      expect(res.newHp).toBe(20);
+      expect(res.healed).toBe(20);
     });
   });
 });

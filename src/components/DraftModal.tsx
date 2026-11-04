@@ -121,6 +121,7 @@ export const DraftModal: React.FC<DraftModalProps> = ({ draftCards, onSelectCard
               <div>• <span style={{ color: 'var(--c-yellow)' }}>SCOUT (-1 🕯️):</span> Reveal adjacent rooms safely before moving.</div>
               <div>• <span style={{ color: 'var(--c-red)' }}>BLIND STEP:</span> Conserve torch fuel, but if it's a Monster (♠), you are <span style={{ color: 'var(--c-red)' }}>AMBUSHED</span> (monster strikes first!).</div>
               <div>• If Torch hits 0, darkness consumes you: you cannot scout.</div>
+              <div>• <span style={{ color: 'var(--c-green)' }}>NEW FLOOR HEAL:</span> Descending the stairs to a new floor restores your <span style={{ color: 'var(--c-green)' }}>HP back to full</span>!</div>
             </div>
 
             {/* 4 Card Suits */}

@@ -8,6 +8,7 @@ import {
   calculateTrapDamage,
   calculateXpGain,
   evaluateLevelUp,
+  calculateFloorTransitionHeal,
 } from './utils/rules';
 import { HUD } from './components/HUD';
 import { DungeonGrid } from './components/DungeonGrid';
@@ -435,9 +436,14 @@ export const App: React.FC = () => {
     const nextFloor = floorNum + 1;
     setFloorNum(nextFloor);
     setGrid(buildFloorGrid(campaign.floors[nextFloor - 1], nextFloor));
-    setPlayer((p) => ({ ...p, position: { r: 0, c: 0 } }));
+
+    const { newHp, healed } = calculateFloorTransitionHeal(player.hp, player.maxHp);
+    setPlayer((p) => ({ ...p, hp: newHp, position: { r: 0, c: 0 } }));
 
     addLog(`▼ Descended into Floor ${nextFloor}! Light fades further...`, 'neutral');
+    if (healed > 0) {
+      addLog(`🌿 Caught your breath on the stairs: HP restored to full (+${healed} HP)!`, 'heal');
+    }
 
     // Wandering Merchant chance between floors
     if (nextFloor === 3) {

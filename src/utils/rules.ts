@@ -89,3 +89,17 @@ export function calculateLegacyScore(params: {
 export function isOrthogonallyAdjacent(r1: number, c1: number, r2: number, c2: number): boolean {
   return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
 }
+
+export interface FloorHealResult {
+  newHp: number;
+  healed: number;
+}
+
+export function calculateFloorTransitionHeal(currentHp: number, maxHp: number): FloorHealResult {
+  const safeHp = Math.max(0, currentHp);
+  const safeMax = Math.max(0, maxHp);
+  return {
+    newHp: safeMax,
+    healed: Math.max(0, safeMax - safeHp),
+  };
+}

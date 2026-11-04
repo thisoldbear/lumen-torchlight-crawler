@@ -1,4 +1,4 @@
-# 🕯️ LUMEN: The Torchlight Catacombs (v1.1.0)
+# 🕯️ LUMEN: The Torchlight Catacombs (v1.2.0)
 ## Complete Physical Tabletop Rules (52-Card Solitaire Crawl)
 
 ---
@@ -138,10 +138,11 @@ When visiting the merchant (Jack ♦ or between floors):
 ### 7. Descending Floors & Game End
 
 1. Clear or defeat the tile at **Stairs `(2,2)`**.
-2. Advance to the next Floor pile (gather the previous floor cards into the discard pile).
-3. **Floor 5 Boss:** On Floor 5, the **Ace of Spades ♠ (The Underlord: 15 HP, 15 DMG)** is waiting.
-4. **Victory:** Defeat The Underlord on Floor 5!
-5. **Legacy Score Calculation:**
+2. **Catch Your Breath:** When descending the stairs into a new floor, catch your breath to restore your **HP back to full (Max HP)**!
+3. Advance to the next Floor pile (gather the previous floor cards into the discard pile).
+4. **Floor 5 Boss:** On Floor 5, the **Ace of Spades ♠ (The Underlord: 15 HP, 15 DMG)** is waiting.
+5. **Victory:** Defeat The Underlord on Floor 5!
+6. **Legacy Score Calculation:**
    $$\text{Final Score} = (\text{HP} \times 10) + (\text{Gold} \times 5) + (\text{Level} \times 50) + (\text{Weapon ATK} \times 20) + 200 \text{ (Clear Bonus)}$$
 
 ---
