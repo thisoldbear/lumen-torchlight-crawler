@@ -8,35 +8,35 @@ import {
 
 describe('Progression, Scoring & Navigation Hardening', () => {
   describe('evaluateLevelUp Boundary Testing', () => {
-    it('does not level up before 10 XP', () => {
-      const res = evaluateLevelUp(9, 1);
+    it('does not level up before 8 XP', () => {
+      const res = evaluateLevelUp(7, 1);
       expect(res.hasLeveledUp).toBe(false);
       expect(res.lvl).toBe(1);
-      expect(res.nextXp).toBe(10);
+      expect(res.nextXp).toBe(8);
     });
 
-    it('levels up to Level 2 at exactly 10 XP', () => {
-      const res = evaluateLevelUp(10, 1);
+    it('levels up to Level 2 at exactly 8 XP', () => {
+      const res = evaluateLevelUp(8, 1);
       expect(res.hasLeveledUp).toBe(true);
       expect(res.lvl).toBe(2);
       expect(res.hpBoost).toBe(5);
       expect(res.atkBoost).toBe(1);
       expect(res.defBoost).toBe(0);
-      expect(res.nextXp).toBe(25);
+      expect(res.nextXp).toBe(18);
     });
 
-    it('levels up to Level 3 at 25 XP', () => {
-      const res = evaluateLevelUp(25, 2);
+    it('levels up to Level 3 at 18 XP', () => {
+      const res = evaluateLevelUp(18, 2);
       expect(res.hasLeveledUp).toBe(true);
       expect(res.lvl).toBe(3);
       expect(res.hpBoost).toBe(5);
       expect(res.defBoost).toBe(1);
       expect(res.atkBoost).toBe(0);
-      expect(res.nextXp).toBe(45);
+      expect(res.nextXp).toBe(30);
     });
 
-    it('levels up to max Level 4 at 45 XP', () => {
-      const res = evaluateLevelUp(45, 3);
+    it('levels up to max Level 4 at 30 XP', () => {
+      const res = evaluateLevelUp(30, 3);
       expect(res.hasLeveledUp).toBe(true);
       expect(res.lvl).toBe(4);
       expect(res.atkBoost).toBe(1);

@@ -76,15 +76,34 @@ describe('Deck Engine & Card Math (52-Card Solitaire Crawl)', () => {
     expect(grid[1].length).toBe(3);
     expect(grid[2].length).toBe(3);
 
-    // Entrance at (0, 0) starts revealed
+    // Entrance at (0, 0) starts revealed and cleared (safe entrance archway)
     expect(grid[0][0].isRevealed).toBe(true);
+    expect(grid[0][0].isCleared).toBe(true);
     expect(grid[0][0].isStairs).toBe(false);
 
     // Stairs at (2, 2)
     expect(grid[2][2].isStairs).toBe(true);
 
-    // Other tiles start unrevealed
+    // Other tiles start unrevealed and uncleared
     expect(grid[0][1].isRevealed).toBe(false);
+    expect(grid[0][1].isCleared).toBe(false);
     expect(grid[1][1].isRevealed).toBe(false);
+    expect(grid[1][1].isCleared).toBe(false);
+  });
+
+  it('guarantees The Underlord (Ace of Spades) is placed at Stairs (2,2) on Floor 5 with no duplicates', () => {
+    const campaign = generateCampaign();
+    const floor5Grid = buildFloorGrid(campaign.floors[4], 5);
+
+    // Stairs tile at (2, 2) must be Ace of Spades
+    const stairsCard = floor5Grid[2][2].card;
+    expect(stairsCard.suit).toBe('spades');
+    expect(stairsCard.rank).toBe('A');
+
+    // Count Ace of Spades across the 3x3 grid - exactly 1
+    const allCards = floor5Grid.flat().map((t) => t.card);
+    const aceCount = allCards.filter((c) => c.suit === 'spades' && c.rank === 'A').length;
+    expect(aceCount).toBe(1);
+    expect(allCards.length).toBe(9);
   });
 });

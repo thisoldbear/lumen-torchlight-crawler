@@ -50,25 +50,25 @@ export interface LevelUpResult {
 
 export function evaluateLevelUp(currentXp: number, currentLvl: number): LevelUpResult {
   let lvl = currentLvl;
-  let nextXp = currentLvl === 1 ? 10 : currentLvl === 2 ? 25 : 45;
+  let nextXp = currentLvl === 1 ? 8 : currentLvl === 2 ? 18 : 30;
   let hpBoost = 0;
   let atkBoost = 0;
   let defBoost = 0;
   let hasLeveledUp = false;
 
-  if (lvl === 1 && currentXp >= 10) {
+  if (lvl === 1 && currentXp >= 8) {
     lvl = 2;
     hpBoost = 5;
     atkBoost = 1;
-    nextXp = 25;
+    nextXp = 18;
     hasLeveledUp = true;
-  } else if (lvl === 2 && currentXp >= 25) {
+  } else if (lvl === 2 && currentXp >= 18) {
     lvl = 3;
     hpBoost = 5;
     defBoost = 1;
-    nextXp = 45;
+    nextXp = 30;
     hasLeveledUp = true;
-  } else if (lvl === 3 && currentXp >= 45) {
+  } else if (lvl === 3 && currentXp >= 30) {
     lvl = 4;
     atkBoost = 1;
     nextXp = 999;
@@ -294,5 +294,26 @@ export function applyMerchantPurchases(
   }
 
   return { updatedPlayer, totalCost, itemNames };
+}
+
+export interface FleeOutcome {
+  canFlee: boolean;
+  newTorch: number;
+  newHp: number;
+  isFatal: boolean;
+}
+
+export function calculateFleeOutcome(torch: number, hp: number): FleeOutcome {
+  if (torch < 1) {
+    return { canFlee: false, newTorch: torch, newHp: hp, isFatal: false };
+  }
+  const newTorch = torch - 1;
+  const newHp = hp - 2;
+  return {
+    canFlee: true,
+    newTorch,
+    newHp: Math.max(0, newHp),
+    isFatal: newHp <= 0,
+  };
 }
 

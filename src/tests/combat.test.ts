@@ -11,6 +11,7 @@ import {
   calculateUnderlordDamage,
   getUnderlordStatsForCycle,
   canCastTorchFlare,
+  calculateFleeOutcome,
 } from '../utils/rules';
 
 describe('Combat Engine Hardening & Math Boundaries', () => {
@@ -211,6 +212,38 @@ describe('Combat Engine Hardening & Math Boundaries', () => {
 
       const bossP2Res = canCastTorchFlare({ level: 4, torch: 4, hasUsedInCombat: false, bossPhase: 2 });
       expect(bossP2Res.canCast).toBe(true);
+    });
+  });
+
+  describe('calculateFleeOutcome Tactical Retreat Rules', () => {
+    it('disallows fleeing when torch is 0 (Pitch Black)', () => {
+      const res = calculateFleeOutcome(0, 10);
+      expect(res.canFlee).toBe(false);
+      expect(res.newTorch).toBe(0);
+      expect(res.newHp).toBe(10);
+      expect(res.isFatal).toBe(false);
+    });
+
+    it('expends 1 torch and deals 2 recoil damage upon successful flee', () => {
+      const res = calculateFleeOutcome(5, 12);
+      expect(res.canFlee).toBe(true);
+      expect(res.newTorch).toBe(4);
+      expect(res.newHp).toBe(10);
+      expect(res.isFatal).toBe(false);
+    });
+
+    it('identifies fatal recoil damage when fleeing at 1 or 2 HP', () => {
+      const resAt2Hp = calculateFleeOutcome(2, 2);
+      expect(resAt2Hp.canFlee).toBe(true);
+      expect(resAt2Hp.newTorch).toBe(1);
+      expect(resAt2Hp.newHp).toBe(0);
+      expect(resAt2Hp.isFatal).toBe(true);
+
+      const resAt1Hp = calculateFleeOutcome(3, 1);
+      expect(resAt1Hp.canFlee).toBe(true);
+      expect(resAt1Hp.newTorch).toBe(2);
+      expect(resAt1Hp.newHp).toBe(0);
+      expect(resAt1Hp.isFatal).toBe(true);
     });
   });
 });

@@ -142,7 +142,11 @@ export const RetroCard: React.FC<RetroCardProps> = ({
           {card.name}
         </div>
         <div style={{ color: card.suit === 'spades' ? 'var(--c-red)' : 'var(--c-yellow)', fontSize: '7px', marginTop: '1px' }}>
-          {card.suit === 'spades' ? `ATK: ${card.numericValue}` : card.suit === 'diamonds' ? `GOLD: ${card.numericValue}` : ''}
+          {card.suit === 'spades'
+            ? (card.rank === 'A' ? 'BOSS (2-PHASE)' : `HP:${card.numericValue} ATK:${Math.ceil(card.numericValue / 2)}`)
+            : card.suit === 'diamonds'
+            ? `GOLD: ${card.numericValue}`
+            : ''}
         </div>
       </div>
 

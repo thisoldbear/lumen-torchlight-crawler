@@ -43,7 +43,7 @@ export function getCardLore(suit: Suit, rank: Rank): { name: string; lore: strin
   if (rank === 'A') return { name: 'Fountain of Rebirth', lore: 'Sacred water granting a Revive Ward.' };
   if (rank === 'K') return { name: 'Knight Sanctuary', lore: 'Holy bonfire. Full heal & restores Torch.' };
   if (rank === 'Q') return { name: 'Fairy Shrine', lore: 'Restores 8 HP and permanently boosts Max HP +4.' };
-  if (rank === 'J') return { name: 'Warm Campfire', lore: 'Rest and cooking pit. Heals 6 HP, +3 Torch.' };
+  if (rank === 'J') return { name: 'Warm Campfire', lore: 'Rest and cooking pit. Heals 8 HP, +3 Torch.' };
   return { name: `Health Draught (+${rank} HP)`, lore: 'Red bubbling restorative potion.' };
 }
 
@@ -113,21 +113,26 @@ export function generateCampaign(): DungeonCampaign {
 
 export function buildFloorGrid(floorCards: Card[], floorNum: number): Tile[][] {
   const grid: Tile[][] = [];
-  let cardIdx = 0;
+  const isBossFloor = floorNum % 5 === 0;
+  const bossCard = isBossFloor
+    ? floorCards.find((c) => c.suit === 'spades' && c.rank === 'A')
+    : undefined;
+  const nonBossCards = isBossFloor && bossCard
+    ? floorCards.filter((c) => c.id !== bossCard.id)
+    : floorCards;
+  let nonBossIdx = 0;
 
   for (let r = 0; r < 3; r++) {
     const row: Tile[] = [];
     for (let c = 0; c < 3; c++) {
       const isEntrance = r === 0 && c === 0;
       const isStairs = r === 2 && c === 2;
-      
+
       let card: Card;
-      if (floorNum % 5 === 0 && isStairs) {
-        // Guarantee Boss is at Stairs in the final floor of every Cycle
-        const boss = floorCards.find(card => card.suit === 'spades' && card.rank === 'A') || floorCards[cardIdx++];
-        card = boss;
+      if (isBossFloor && isStairs && bossCard) {
+        card = bossCard;
       } else {
-        card = floorCards[cardIdx++];
+        card = nonBossCards[nonBossIdx++];
       }
 
       row.push({
@@ -135,7 +140,7 @@ export function buildFloorGrid(floorCards: Card[], floorNum: number): Tile[][] {
         c,
         card,
         isRevealed: isEntrance, // Entrance starts face-up
-        isCleared: false,
+        isCleared: isEntrance,  // Safe entrance archway (already cleared)
         isStairs,
       });
     }

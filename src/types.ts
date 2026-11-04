@@ -53,6 +53,7 @@ export interface CombatState {
   bossPhase?: 1 | 2;
   hasUsedTorchFlare?: boolean;
   cycle?: number;
+  previousPosition: { r: number; c: number };
 }
 
 export type GameStage = 

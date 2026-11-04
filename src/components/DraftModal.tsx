@@ -117,7 +117,7 @@ export const DraftModal: React.FC<DraftModalProps> = ({ draftCards, onSelectCard
             {/* Exploration & Torch */}
             <div style={{ marginBottom: '10px' }}>
               <div style={{ color: 'var(--c-yellow)', fontWeight: 'bold' }}>🕯️ NAVIGATION & TORCH:</div>
-              <div>• Move orthogonally (Up, Down, Left, Right) starting from Entrance (0,0) to Stairs (2,2).</div>
+              <div>• Move orthogonally (Up, Down, Left, Right) starting from safe Entrance archway (0,0) to Stairs (2,2).</div>
               <div>• <span style={{ color: 'var(--c-yellow)' }}>SCOUT (-1 🕯️):</span> Reveal adjacent rooms safely before moving.</div>
               <div>• <span style={{ color: 'var(--c-red)' }}>BLIND STEP:</span> Conserve torch fuel, but if it's a Monster (♠), you are <span style={{ color: 'var(--c-red)' }}>AMBUSHED</span> (monster strikes first!).</div>
               <div>• If Torch hits 0, darkness consumes you: you cannot scout.</div>
@@ -127,10 +127,10 @@ export const DraftModal: React.FC<DraftModalProps> = ({ draftCards, onSelectCard
             {/* 4 Card Suits */}
             <div style={{ marginBottom: '10px' }}>
               <div style={{ color: 'var(--c-white)', fontWeight: 'bold' }}>🃏 THE 4 CARD SUITS:</div>
-              <div>• <span style={{ color: 'var(--c-white)' }}>♠ SPADES (Monsters & Boss):</span> Turn-based battle. The Underlord (Ace ♠) is a 2-phase raid boss (20 HP Slumbering Sovereign $\to$ 20 HP Void Unleashed with armor-piercing Crushing Ruin)!</div>
+              <div>• <span style={{ color: 'var(--c-white)' }}>♠ SPADES (Monsters & Boss):</span> Turn-based battle. The Underlord (Ace ♠ at Stairs 2,2) is a 2-phase raid boss (20 HP Slumbering Sovereign $\to$ 20 HP Void Unleashed with armor-piercing Crushing Ruin)!</div>
               <div>• <span style={{ color: 'var(--c-green)' }}>♣ CLUBS (Traps & Snare):</span> Suffer mitigated trap damage, but salvage wooden timber to gain <span style={{ color: 'var(--c-yellow)' }}>+2 Torch</span>!</div>
-              <div>• <span style={{ color: 'var(--c-cyan)' }}>♦ DIAMONDS (Treasure):</span> Gold caches, Swords (+ATK), Shields (+DEF), and Wandering Merchants.</div>
-              <div>• <span style={{ color: 'var(--c-red)' }}>♥ HEARTS (Sanctuaries):</span> Health potions, fairy blessings (+Max HP), campfires (+HP & +Torch), and Revive Tokens.</div>
+              <div>• <span style={{ color: 'var(--c-cyan)' }}>♦ DIAMONDS (Treasure):</span> Gold caches, Swords (+ATK), Shields (+DEF), and Wandering Merchant (at Floor 3 & Jack ♦).</div>
+              <div>• <span style={{ color: 'var(--c-red)' }}>♥ HEARTS (Sanctuaries):</span> Health potions, fairy blessings (+Max HP), Knight Sanctuary (full heal & +4 Torch), campfires (+8 HP & +3 Torch), and Revive Tokens.</div>
             </div>
 
             {/* Combat System Clarity */}
@@ -139,7 +139,7 @@ export const DraftModal: React.FC<DraftModalProps> = ({ draftCards, onSelectCard
               <div>• <span style={{ color: 'var(--c-yellow)' }}>NO CARD HAND:</span> Cards represent rooms & monsters. You attack directly using your Hero's stats (Starts at 3 Base ATK + Weapon)!</div>
               <div>• <span style={{ color: 'var(--c-cyan)' }}>HERO STRIKE:</span> Choosing <b>Attack</b> strikes the monster first. If the monster dies from your blow, it is slain instantly and cannot hit back!</div>
               <div>• <span style={{ color: 'var(--c-red)' }}>MONSTER POWER:</span> Monster ATK is scaled to ⌈Rank / 2⌉ (HP = full rank). Surviving foes counter-attack for Monster ATK − Your DEF (min 1).</div>
-              <div>• <span style={{ color: 'var(--c-green)' }}>TACTICAL OPTIONS:</span> Drink a Potion (+8 HP without triggering retaliation), Flee (-1🕯️, -2 HP), or cast Torch Flare (Lvl 4, 1x per battle, absorbed in Boss Phase 1).</div>
+              <div>• <span style={{ color: 'var(--c-green)' }}>TACTICAL OPTIONS:</span> Drink a Potion (+8 HP without triggering retaliation), Flee (-1🕯️, -2 HP, rebound to previous room), or cast Torch Flare (Lvl 4, 1x per battle, absorbed in Boss Phase 1).</div>
               <div>• <span style={{ color: 'var(--c-yellow)' }}>FIGHT VS. FLEE:</span> Fighting is your only path to XP, levels, and tile clearance. However, <b>Fleeing</b> costs a flat 1 Torch & 2 HP—an invaluable emergency brake if a high-rank foe would otherwise kill you!</div>
             </div>
 
@@ -147,16 +147,16 @@ export const DraftModal: React.FC<DraftModalProps> = ({ draftCards, onSelectCard
             <div style={{ marginBottom: '10px' }}>
               <div style={{ color: 'var(--c-cyan)', fontWeight: 'bold' }}>⭐ LEVELING UP:</div>
               <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 1 (Start):</span> 3 Base ATK, 0 DEF, 20 Max HP</div>
-              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 2 (10 XP):</span> +5 Max HP, heal 5 HP, Base ATK increases to 4</div>
-              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 3 (25 XP):</span> +5 Max HP, Base DEF increases to 1</div>
-              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 4 (45 XP):</span> Base ATK increases to 5, unlock <span style={{ color: 'var(--c-yellow)' }}>Torch Flare</span> (spend 2 Torch for 6 instant fire damage; 1x per battle)</div>
+              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 2 (8 XP):</span> +5 Max HP, heal 5 HP, Base ATK increases to 4</div>
+              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 3 (18 XP):</span> +5 Max HP, Base DEF increases to 1</div>
+              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 4 (30 XP):</span> Base ATK increases to 5, unlock <span style={{ color: 'var(--c-yellow)' }}>Torch Flare</span> (spend 2 Torch for 6 instant fire damage; 1x per battle)</div>
             </div>
 
             {/* Abyssal Cycles */}
             <div style={{ marginBottom: '14px' }}>
               <div style={{ color: 'var(--c-yellow)', fontWeight: 'bold' }}>🌀 ABYSSAL CYCLES (INFINITE PLAY):</div>
               <div>• Vanquishing The Underlord unlocks the choice to <b>Retire with Glory</b> or <b>Delve into the Abyss</b>!</div>
-              <div>• Delving reshuffles all 52 cards into a new 5-floor cycle. Keep your hero gear, level, and gold while facing scaled monsters (+ATK/+HP) for massive score multipliers (1.5x, 2.0x)!</div>
+              <div>• Delving reshuffles all 52 cards into a new 5-floor cycle with an opening Abyssal Draft boon. Keep your hero gear, level, and gold while facing scaled monsters (+ATK/+HP) for massive score multipliers (1.5x, 2.0x)!</div>
             </div>
 
             <button

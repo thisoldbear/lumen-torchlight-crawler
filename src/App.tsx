@@ -16,6 +16,7 @@ import {
   getUnderlordStatsForCycle,
   calculateUnderlordDamage,
   canCastTorchFlare,
+  calculateFleeOutcome,
 } from './utils/rules';
 import { HUD } from './components/HUD';
 import { DungeonGrid } from './components/DungeonGrid';
@@ -40,7 +41,7 @@ export const App: React.FC = () => {
     maxTorch: 8,
     gold: 0,
     xp: 0,
-    nextLevelXp: 10,
+    nextLevelXp: 8,
     level: 1,
     baseAtk: 3,
     baseDef: 0,
@@ -73,23 +74,35 @@ export const App: React.FC = () => {
     let newTorch = player.torch;
     let newWeapon = player.weapon;
     let newPotions = player.potions;
+    let newHasRevive = player.hasRevive;
 
     if (card.suit === 'diamonds') {
       if (typeof card.rank === 'number') {
         newGold += card.numericValue;
         addLog(`Drafted ${card.name}: Pocketed +${card.numericValue} starting Gold!`, 'gain');
       } else {
-        newWeapon = { name: 'Rusty Shortsword', bonus: 1, type: 'weapon' };
-        addLog(`Drafted ${card.name}: Equipped Rusty Shortsword (+1 ATK)!`, 'gain');
+        // Face cards and Ace: Buffed draft boon (+8 Gold AND weapon if not already wielding better)
+        newGold += 8;
+        if (!newWeapon || newWeapon.bonus < 1) {
+          newWeapon = { name: 'Rusty Shortsword', bonus: 1, type: 'weapon' };
+        }
+        addLog(`Drafted ${card.name}: Pocketed +8 Gold and equipped Rusty Shortsword (+1 ATK)!`, 'gain');
       }
     } else if (card.suit === 'hearts') {
       newPotions = Math.min(2, newPotions + 1);
-      addLog(`Drafted ${card.name}: Packed an extra Healing Potion!`, 'heal');
+      if (card.rank === 'A') {
+        newHasRevive = true;
+        addLog(`Drafted ${card.name}: Packed an extra Healing Potion & blessed with Revive Ward!`, 'heal');
+      } else {
+        addLog(`Drafted ${card.name}: Packed an extra Healing Potion!`, 'heal');
+      }
     } else if (card.suit === 'clubs') {
       newTorch = Math.min(player.maxTorch, newTorch + 2);
       addLog(`Drafted ${card.name}: Salvaged pitch & wood for +2 Torch!`, 'gain');
     } else {
-      newWeapon = { name: 'Bone Dagger', bonus: 1, type: 'weapon' };
+      if (!newWeapon || newWeapon.bonus < 1) {
+        newWeapon = { name: 'Bone Dagger', bonus: 1, type: 'weapon' };
+      }
       addLog(`Drafted ${card.name}: Fashioned a Bone Dagger (+1 ATK)!`, 'gain');
     }
 
@@ -99,10 +112,11 @@ export const App: React.FC = () => {
       torch: newTorch,
       weapon: newWeapon,
       potions: newPotions,
+      hasRevive: newHasRevive,
     }));
 
     setStage('EXPLORING');
-    addLog(`Descending into Floor 1: The Sunken Crypts...`, 'neutral');
+    addLog(`Delving into Floor ${floorNum}: The Catacombs await...`, 'neutral');
   };
 
   // Scout Tile
@@ -126,6 +140,8 @@ export const App: React.FC = () => {
 
   // Enter Tile
   const handleEnterTile = (r: number, c: number, blind: boolean) => {
+    const prevPosition = { ...player.position };
+
     // Reveal tile & update player pos
     setGrid((prevGrid) => {
       const next = prevGrid.map((row) => row.map((tile) => ({ ...tile })));
@@ -186,6 +202,7 @@ export const App: React.FC = () => {
         bossPhase: isBoss ? 1 : undefined,
         hasUsedTorchFlare: false,
         cycle: player.cycle,
+        previousPosition: prevPosition,
       });
       setStage('COMBAT');
     } else if (card.suit === 'clubs') {
@@ -289,6 +306,17 @@ export const App: React.FC = () => {
         hp: Math.min(p.maxHp + 4, p.hp + 8),
       }));
       addLog(`🧚 Received Fairy Blessing: +4 Max HP and healed 8 HP!`, 'heal');
+      return;
+    }
+
+    if (card.rank === 'K') {
+      // Knight Sanctuary - Holy bonfire
+      setPlayer((p) => ({
+        ...p,
+        hp: p.maxHp,
+        torch: Math.min(p.maxTorch, p.torch + 4),
+      }));
+      addLog(`🔥 Knight Sanctuary: Holy bonfire fully restored your HP and rekindled +4 Torch!`, 'heal');
       return;
     }
 
@@ -445,19 +473,28 @@ export const App: React.FC = () => {
 
   // Combat Flee
   const handleCombatFlee = () => {
-    if (player.torch < 1) {
+    if (!combat) return;
+
+    const outcome = calculateFleeOutcome(player.torch, player.hp);
+    if (!outcome.canFlee) {
       addLog(`Cannot flee in pitch dark!`, 'danger');
       return;
     }
 
-    const newHp = player.hp - 2;
-    addLog(`🏃 Fled in panic! Expended 1 Torch and took 2 recoil damage.`, 'danger');
+    const prevPos = combat.previousPosition;
+    addLog(`🏃 Fled in panic! Expended 1 Torch and took 2 recoil damage. Rebounded to room (${prevPos.r + 1}, ${prevPos.c + 1}).`, 'danger');
 
-    setPlayer((p) => ({ ...p, torch: p.torch - 1, hp: Math.max(1, newHp) }));
     setCombat(null);
     setStage('EXPLORING');
 
-    if (newHp <= 0) {
+    setPlayer((p) => ({
+      ...p,
+      torch: outcome.newTorch,
+      hp: outcome.newHp,
+      position: prevPos,
+    }));
+
+    if (outcome.isFatal) {
       handlePlayerDeath();
     }
   };
@@ -531,8 +568,8 @@ export const App: React.FC = () => {
       position: { r: 0, c: 0 },
     }));
 
-    setStage('EXPLORING');
-    addLog(`🌀 THE ABYSS CONSUMES YOU! Entering Cycle ${nextCycle} (Floor ${nextFloor})...`, 'danger');
+    setStage('DRAFT');
+    addLog(`🌀 THE ABYSS CONSUMES YOU! Entering Cycle ${nextCycle} (Floor ${nextFloor})... Choose your Abyssal Boon!`, 'danger');
     addLog(`🔥 Monsters grow fiercer (+${(nextCycle - 1) * 2} ATK, +${(nextCycle - 1) * 5} HP). Hold fast to your torch!`, 'neutral');
     if (healed > 0) {
       addLog(`🌿 Field dressing on the abyss threshold restored +${healed} HP!`, 'heal');
@@ -567,7 +604,7 @@ export const App: React.FC = () => {
       maxTorch: 8,
       gold: 0,
       xp: 0,
-      nextLevelXp: 10,
+      nextLevelXp: 8,
       level: 1,
       baseAtk: 3,
       baseDef: 0,
