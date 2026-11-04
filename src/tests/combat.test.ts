@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   calculateHeroAttack,
+  calculateMonsterAttack,
   calculateMitigatedDamage,
   calculateTrapDamage,
   calculateXpGain,
@@ -18,6 +19,30 @@ describe('Combat Engine Hardening & Math Boundaries', () => {
       expect(calculateHeroAttack(0, 0)).toBe(1);
       expect(calculateHeroAttack(-5, 2)).toBe(1);
       expect(calculateHeroAttack(1, -10)).toBe(1);
+    });
+  });
+
+  describe('calculateMonsterAttack', () => {
+    it('scales monster attack power to ceil(numericValue / 2)', () => {
+      expect(calculateMonsterAttack(2)).toBe(1); // Rank 2
+      expect(calculateMonsterAttack(3)).toBe(2); // Rank 3
+      expect(calculateMonsterAttack(7)).toBe(4); // Rank 7
+      expect(calculateMonsterAttack(10)).toBe(5); // Rank 10
+      expect(calculateMonsterAttack(11)).toBe(6); // Jack
+      expect(calculateMonsterAttack(12)).toBe(6); // Queen
+      expect(calculateMonsterAttack(13)).toBe(7); // King
+      expect(calculateMonsterAttack(15)).toBe(8); // Underlord Ace
+    });
+
+    it('adds +1 bonus attack when the dungeon is in pitch black (torch = 0)', () => {
+      expect(calculateMonsterAttack(2, true)).toBe(2);
+      expect(calculateMonsterAttack(7, true)).toBe(5);
+      expect(calculateMonsterAttack(15, true)).toBe(9);
+    });
+
+    it('guarantees minimum attack of 1 for edge or negative values', () => {
+      expect(calculateMonsterAttack(0)).toBe(1);
+      expect(calculateMonsterAttack(-4)).toBe(1);
     });
   });
 

@@ -1,4 +1,4 @@
-# 🕯️ LUMEN: The Torchlight Catacombs (v1.0.1)
+# 🕯️ LUMEN: The Torchlight Catacombs (v1.1.0)
 *A 3-Bit Retro 52-Card Spatial Dungeon Crawler built with Vite + React + TypeScript.*
 
 [![Repository](https://img.shields.io/badge/GitHub-thisoldbear%2Flumen--torchlight--crawler-1c62e8?style=flat&logo=github)](https://github.com/thisoldbear/lumen-torchlight-crawler)

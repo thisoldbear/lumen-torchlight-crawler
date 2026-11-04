@@ -135,18 +135,19 @@ export const DraftModal: React.FC<DraftModalProps> = ({ draftCards, onSelectCard
             {/* Combat System Clarity */}
             <div style={{ marginBottom: '10px' }}>
               <div style={{ color: 'var(--c-red)', fontWeight: 'bold' }}>⚔️ HOW COMBAT WORKS:</div>
-              <div>• <span style={{ color: 'var(--c-yellow)' }}>NO CARD HAND:</span> Cards represent rooms & monsters, not a hand you play! You attack directly using your Hero's stats (Base ATK + Weapon).</div>
+              <div>• <span style={{ color: 'var(--c-yellow)' }}>NO CARD HAND:</span> Cards represent rooms & monsters. You attack directly using your Hero's stats (Starts at 3 Base ATK + Weapon)!</div>
               <div>• <span style={{ color: 'var(--c-cyan)' }}>HERO STRIKE:</span> Choosing <b>Attack</b> strikes the monster first. If the monster dies from your blow, it is slain instantly and cannot hit back!</div>
-              <div>• <span style={{ color: 'var(--c-red)' }}>RETALIATION:</span> If the monster survives, it counter-attacks: DMG = Monster ATK − Your DEF (min 1).</div>
+              <div>• <span style={{ color: 'var(--c-red)' }}>MONSTER POWER:</span> Monster ATK is scaled to ⌈Rank / 2⌉ (HP = full rank). Surviving foes counter-attack for Monster ATK − Your DEF (min 1).</div>
               <div>• <span style={{ color: 'var(--c-green)' }}>TACTICAL OPTIONS:</span> Drink a Potion (+8 HP without triggering retaliation), Flee (-1🕯️, -2 HP), or cast Torch Flare (Lvl 4).</div>
             </div>
 
             {/* Leveling */}
             <div style={{ marginBottom: '14px' }}>
               <div style={{ color: 'var(--c-cyan)', fontWeight: 'bold' }}>⭐ LEVELING UP:</div>
-              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 2 (10 XP):</span> +5 Max HP, heal 5 HP, +1 Base ATK</div>
-              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 3 (25 XP):</span> +5 Max HP, +1 Base DEF</div>
-              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 4 (45 XP):</span> +1 Base ATK, unlock <span style={{ color: 'var(--c-yellow)' }}>Torch Flare</span> (spend 2 Torch for 6 instant fire damage)</div>
+              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 1 (Start):</span> 3 Base ATK, 0 DEF, 20 Max HP</div>
+              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 2 (10 XP):</span> +5 Max HP, heal 5 HP, Base ATK increases to 4</div>
+              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 3 (25 XP):</span> +5 Max HP, Base DEF increases to 1</div>
+              <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 4 (45 XP):</span> Base ATK increases to 5, unlock <span style={{ color: 'var(--c-yellow)' }}>Torch Flare</span> (spend 2 Torch for 6 instant fire damage)</div>
             </div>
 
             <button

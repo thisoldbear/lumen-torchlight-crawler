@@ -3,6 +3,7 @@ import { Card, CombatState, GameStage, LogMessage, PlayerState, Tile } from './t
 import { buildFloorGrid, generateCampaign } from './utils/deck';
 import {
   calculateHeroAttack,
+  calculateMonsterAttack,
   calculateMitigatedDamage,
   calculateTrapDamage,
   calculateXpGain,
@@ -32,7 +33,7 @@ export const App: React.FC = () => {
     xp: 0,
     nextLevelXp: 10,
     level: 1,
-    baseAtk: 2,
+    baseAtk: 3,
     baseDef: 0,
     weapon: null,
     armor: null,
@@ -136,7 +137,7 @@ export const App: React.FC = () => {
     if (card.suit === 'spades') {
       // Monster Encounter
       const monsterHp = card.numericValue;
-      const monsterAtk = card.numericValue;
+      const monsterAtk = calculateMonsterAttack(card.numericValue, player.torch === 0);
       const isAmbush = blind;
 
       if (isAmbush) {
@@ -476,7 +477,7 @@ export const App: React.FC = () => {
       xp: 0,
       nextLevelXp: 10,
       level: 1,
-      baseAtk: 2,
+      baseAtk: 3,
       baseDef: 0,
       weapon: null,
       armor: null,

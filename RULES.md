@@ -1,4 +1,4 @@
-# 🕯️ LUMEN: The Torchlight Catacombs (v1.0.1)
+# 🕯️ LUMEN: The Torchlight Catacombs (v1.1.0)
 ## Complete Physical Tabletop Rules (52-Card Solitaire Crawl)
 
 ---
@@ -12,6 +12,7 @@
    - **Torch:** Starts at `6` (Max `8`)
    - **Gold:** Starts at `0`
    - **Level & XP:** Starts at `Level 1` (`0 / 10 XP`)
+   - **Base ATK:** Starts at `3`
    - **Equipped Weapon:** Starts at `None` (+0 ATK)
    - **Equipped Armor:** Starts at `None` (+0 DEF)
    - **Potions in Pack:** Starts with `1` (Max `2`)
@@ -75,7 +76,8 @@ Take the 9 cards for the current floor and lay them out in a **3x3 face-down gri
 > **Important Note:** You do **not** hold or play cards to attack! The 52-card deck represents the dungeon chambers and hazards. Your Hero strikes directly using your character's current stats ($\text{Base ATK} + \text{Equipped Weapon ATK}$).
 
 - **Monster HP** = Card Value ($2–10 = \text{Rank}, J=11, Q=12, K=13, A=15$).
-- **Monster Attack** = Card Value (+1 if Torch = 0).
+- **Monster Attack** = $\lceil \text{Card Value} / 2 \rceil$ (+1 if Torch = 0 / Pitch Black).
+  *(e.g., Rank 2 = 1 ATK, Rank 3 = 2 ATK, Rank 10 = 5 ATK, Face cards = 6–7 ATK, Underlord Ace = 8 ATK).*
 - **Combat Turns:**
   1. *Ambush Check:* If you stepped blindly into an unrevealed room, take:
      $$\text{Ambush Damage} = \max(1, \text{Monster Attack} - \text{Equipped Armor DEF})$$
@@ -112,10 +114,10 @@ Defeating Spades awards XP. When XP reaches the threshold, level up immediately:
 
 | Level | XP Threshold | Level Perks |
 | :--- | :--- | :--- |
-| **Level 1** | 0 XP | Base ATK: 2, Base DEF: 0, Max HP: 20, Max Torch: 8 |
-| **Level 2** | 10 XP | +5 Max HP, Instant +5 Heal, Base ATK increases to 3 |
+| **Level 1** | 0 XP | Base ATK: 3, Base DEF: 0, Max HP: 20, Max Torch: 8 |
+| **Level 2** | 10 XP | +5 Max HP, Instant +5 Heal, Base ATK increases to 4 |
 | **Level 3** | 25 XP | +5 Max HP, Base DEF increases to 1 |
-| **Level 4** | 45 XP | Base ATK increases to 4, Unlock **Torch Flare** (Spend 2 Torch for 6 instant fire damage) |
+| **Level 4** | 45 XP | Base ATK increases to 5, Unlock **Torch Flare** (Spend 2 Torch for 6 instant fire damage) |
 
 ---
 

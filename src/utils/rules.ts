@@ -4,6 +4,11 @@ export function calculateHeroAttack(baseAtk: number, weaponBonus: number = 0): n
   return Math.max(1, baseAtk + weaponBonus);
 }
 
+export function calculateMonsterAttack(cardNumericValue: number, isPitchBlack: boolean = false): number {
+  const baseAtk = Math.max(1, Math.ceil(cardNumericValue / 2));
+  return baseAtk + (isPitchBlack ? 1 : 0);
+}
+
 export function calculateMitigatedDamage(incomingAtk: number, defense: number = 0): number {
   return Math.max(1, incomingAtk - Math.max(0, defense));
 }
