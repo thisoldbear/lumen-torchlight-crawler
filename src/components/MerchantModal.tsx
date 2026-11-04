@@ -1,24 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PlayerState } from '../types';
+import {
+  MERCHANT_ITEMS,
+  MerchantItemId,
+  calculateMerchantTotalCost,
+  isMerchantItemEligible,
+} from '../utils/rules';
 
 interface MerchantModalProps {
   player: PlayerState;
-  onBuyItem: (type: 'torch' | 'potion' | 'weapon' | 'armor' | 'revive', cost: number) => void;
-  onClose: () => void;
+  onContinueExpedition: (selectedItemIds: MerchantItemId[]) => void;
 }
 
 export const MerchantModal: React.FC<MerchantModalProps> = ({
   player,
-  onBuyItem,
-  onClose,
+  onContinueExpedition,
 }) => {
-  const shopItems = [
-    { id: 'torch', name: 'Torch Tinder (+3 Torch)', cost: 4, canBuy: player.gold >= 4 && player.torch < player.maxTorch },
-    { id: 'potion', name: 'Healing Potion (+1 Pack)', cost: 6, canBuy: player.gold >= 6 && player.potions < 2 },
-    { id: 'weapon', name: 'Runic Blade (+3 ATK)', cost: 12, canBuy: player.gold >= 12 && (!player.weapon || player.weapon.bonus < 3) },
-    { id: 'armor', name: 'Knight Armor (+2 DEF)', cost: 10, canBuy: player.gold >= 10 && (!player.armor || player.armor.bonus < 2) },
-    { id: 'revive', name: 'Phoenix Amulet (1x Revive)', cost: 18, canBuy: player.gold >= 18 && !player.hasRevive },
-  ] as const;
+  const [selectedItemIds, setSelectedItemIds] = useState<MerchantItemId[]>([]);
+
+  const totalCost = calculateMerchantTotalCost(selectedItemIds);
+  const remainingGold = player.gold - totalCost;
+
+  const handleToggleItem = (itemId: MerchantItemId) => {
+    if (selectedItemIds.includes(itemId)) {
+      setSelectedItemIds(selectedItemIds.filter((id) => id !== itemId));
+      return;
+    }
+
+    const item = MERCHANT_ITEMS.find((i) => i.id === itemId);
+    if (!item) return;
+
+    const { eligible } = isMerchantItemEligible(item, player);
+    if (!eligible) return;
+
+    if (remainingGold < item.cost) return;
+
+    setSelectedItemIds([...selectedItemIds, itemId]);
+  };
 
   return (
     <div
@@ -36,58 +54,158 @@ export const MerchantModal: React.FC<MerchantModalProps> = ({
         padding: '16px',
       }}
     >
-      <div className="pixel-panel yellow" style={{ maxWidth: '420px', width: '100%', textAlign: 'center' }}>
-        <div style={{ fontSize: '12px', color: 'var(--c-yellow)', marginBottom: '4px' }}>
-          🛒 WANDERING MERCHANT'S WAGON 🛒
+      <div className="pixel-panel yellow" style={{ maxWidth: '440px', width: '100%', textAlign: 'center' }}>
+        <div style={{ fontSize: '13px', color: 'var(--c-yellow)', marginBottom: '4px', letterSpacing: '1px' }}>
+          🛒 WANDERING MERCHANT 🛒
         </div>
-        <div style={{ fontSize: '8px', color: '#9aa2b6', marginBottom: '12px' }}>
+        <div style={{ fontSize: '8px', color: '#9aa2b6', marginBottom: '8px' }}>
           "Coins speak louder than steel down here, traveler."
         </div>
+        <div style={{ fontSize: '7px', color: '#77849e', marginBottom: '12px' }}>
+          Select items to purchase. Choices lock in upon continuing.
+        </div>
 
-        <div style={{ fontSize: '9px', color: 'var(--c-yellow)', marginBottom: '12px' }}>
-          YOUR PURSE: {player.gold} GOLD
+        {/* Purse & Cost Calculation Ledger */}
+        <div
+          style={{
+            backgroundColor: '#121622',
+            border: '2px solid #2d3446',
+            padding: '8px 10px',
+            marginBottom: '12px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontSize: '8px',
+          }}
+        >
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ color: '#9aa2b6', marginBottom: '2px' }}>PURSE</div>
+            <div style={{ color: 'var(--c-yellow)', fontWeight: 'bold' }}>{player.gold} GOLD</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ color: '#9aa2b6', marginBottom: '2px' }}>TOTAL COST</div>
+            <div style={{ color: totalCost > 0 ? 'var(--c-cyan)' : 'var(--c-white)', fontWeight: 'bold' }}>
+              {totalCost} GOLD
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ color: '#9aa2b6', marginBottom: '2px' }}>REMAINING</div>
+            <div
+              style={{
+                color: remainingGold === 0 && totalCost > 0 ? 'var(--c-green)' : 'var(--c-yellow)',
+                fontWeight: 'bold',
+              }}
+            >
+              {remainingGold} GOLD
+            </div>
+          </div>
         </div>
 
         {/* Shop Items List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-          {shopItems.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                backgroundColor: '#161922',
-                padding: '8px 10px',
-                border: '2px solid #2d3446',
-                fontSize: '8px',
-              }}
-            >
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ color: 'var(--c-white)' }}>{item.name}</div>
-                <div style={{ color: 'var(--c-yellow)' }}>COST: {item.cost} GOLD</div>
-              </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
+          {MERCHANT_ITEMS.map((item) => {
+            const isSelected = selectedItemIds.includes(item.id);
+            const { eligible, reason } = isMerchantItemEligible(item, player);
+            const canAfford = remainingGold >= item.cost;
+            const isSelectable = !isSelected && eligible && canAfford;
+            const isInteractive = isSelected || isSelectable;
 
-              <button
+            let buttonLabel = '+ SELECT';
+            let buttonClass = 'pixel-btn';
+            let isDisabled = false;
+
+            if (isSelected) {
+              buttonLabel = '✓ SELECTED';
+              buttonClass = 'pixel-btn btn-green';
+            } else if (!eligible) {
+              buttonLabel = reason || 'UNAVAILABLE';
+              isDisabled = true;
+            } else if (!canAfford) {
+              buttonLabel = `NEED ${item.cost}G`;
+              isDisabled = true;
+            }
+
+            return (
+              <div
+                key={item.id}
                 onClick={() => {
-                  onBuyItem(item.id, item.cost);
+                  if (isInteractive) {
+                    handleToggleItem(item.id);
+                  }
                 }}
-                disabled={!item.canBuy}
-                className="pixel-btn btn-green"
-                style={{ fontSize: '8px', padding: '4px 8px' }}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  backgroundColor: isSelected ? '#15261d' : '#161922',
+                  padding: '8px 10px',
+                  border: isSelected ? '2px solid var(--c-green)' : '2px solid #2d3446',
+                  boxShadow: isSelected ? '0 0 6px rgba(0, 204, 68, 0.4)' : 'none',
+                  fontSize: '8px',
+                  cursor: isInteractive ? 'pointer' : 'default',
+                  opacity: !eligible ? 0.5 : !isSelected && !canAfford ? 0.75 : 1,
+                  transition: 'all 0.1s ease',
+                }}
               >
-                BUY
-              </button>
-            </div>
-          ))}
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ color: isSelected ? 'var(--c-green)' : 'var(--c-white)', fontWeight: 'bold' }}>
+                    {isSelected ? '✓ ' : ''}{item.name} ({item.detail})
+                  </div>
+                  <div style={{ color: 'var(--c-yellow)', marginTop: '2px' }}>
+                    COST: {item.cost} GOLD
+                  </div>
+                </div>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isInteractive) {
+                      handleToggleItem(item.id);
+                    }
+                  }}
+                  disabled={isDisabled}
+                  className={buttonClass}
+                  style={{
+                    fontSize: '8px',
+                    padding: '5px 8px',
+                    minWidth: '84px',
+                  }}
+                >
+                  {buttonLabel}
+                </button>
+              </div>
+            );
+          })}
         </div>
 
+        {/* Clear Selection helper if items selected */}
+        {selectedItemIds.length > 0 && (
+          <div style={{ marginBottom: '8px' }}>
+            <button
+              onClick={() => setSelectedItemIds([])}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#9aa2b6',
+                fontSize: '7px',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+              }}
+            >
+              Clear Selection
+            </button>
+          </div>
+        )}
+
+        {/* Continue Expedition - Locks in purchases */}
         <button
-          onClick={onClose}
+          onClick={() => onContinueExpedition(selectedItemIds)}
           className="pixel-btn btn-green"
-          style={{ width: '100%', padding: '10px', fontSize: '10px' }}
+          style={{ width: '100%', padding: '10px', fontSize: '9px' }}
         >
-          CONTINUE EXPEDITION ▶
+          {selectedItemIds.length > 0
+            ? `CONTINUE EXPEDITION (BUY ${selectedItemIds.length} FOR ${totalCost}G) ▶`
+            : `CONTINUE EXPEDITION ▶`}
         </button>
       </div>
     </div>

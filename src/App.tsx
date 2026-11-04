@@ -9,6 +9,8 @@ import {
   calculateXpGain,
   evaluateLevelUp,
   calculateFloorTransitionHeal,
+  MerchantItemId,
+  applyMerchantPurchases,
 } from './utils/rules';
 import { HUD } from './components/HUD';
 import { DungeonGrid } from './components/DungeonGrid';
@@ -451,21 +453,18 @@ export const App: React.FC = () => {
     }
   };
 
-  // Merchant Purchases
-  const handleBuyMerchantItem = (type: 'torch' | 'potion' | 'weapon' | 'armor' | 'revive', cost: number) => {
-    if (player.gold < cost) return;
+  // Wandering Merchant Purchases - locked in upon continuing expedition
+  const handleContinueFromMerchant = (selectedItemIds: MerchantItemId[]) => {
+    if (selectedItemIds.length === 0) {
+      addLog(`Departed the Wandering Merchant without making purchases.`, 'neutral');
+      setStage('EXPLORING');
+      return;
+    }
 
-    setPlayer((p) => {
-      const updated = { ...p, gold: p.gold - cost };
-      if (type === 'torch') updated.torch = Math.min(p.maxTorch, p.torch + 3);
-      if (type === 'potion') updated.potions = Math.min(2, p.potions + 1);
-      if (type === 'weapon') updated.weapon = { name: 'Runic Blade', bonus: 3, type: 'weapon' };
-      if (type === 'armor') updated.armor = { name: 'Knight Armor', bonus: 2, type: 'armor' };
-      if (type === 'revive') updated.hasRevive = true;
-      return updated;
-    });
-
-    addLog(`🛒 Purchased ${type.toUpperCase()} from merchant for ${cost} Gold.`, 'gain');
+    const { updatedPlayer, totalCost, itemNames } = applyMerchantPurchases(player, selectedItemIds);
+    setPlayer(updatedPlayer);
+    addLog(`🛒 Purchased ${itemNames.join(', ')} from Wandering Merchant for ${totalCost} Gold.`, 'gain');
+    setStage('EXPLORING');
   };
 
   // Restart Game
@@ -566,8 +565,7 @@ export const App: React.FC = () => {
       {stage === 'MERCHANT' && (
         <MerchantModal
           player={player}
-          onBuyItem={handleBuyMerchantItem}
-          onClose={() => setStage('EXPLORING')}
+          onContinueExpedition={handleContinueFromMerchant}
         />
       )}
 

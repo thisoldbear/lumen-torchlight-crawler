@@ -1,5 +1,7 @@
 // Pure Game Engine Rules & Formulas (Single Source of Truth)
 
+import { PlayerState } from '../types';
+
 export function calculateHeroAttack(baseAtk: number, weaponBonus: number = 0): number {
   return Math.max(1, baseAtk + weaponBonus);
 }
@@ -103,3 +105,92 @@ export function calculateFloorTransitionHeal(currentHp: number, maxHp: number): 
     healed: Math.max(0, safeMax - safeHp),
   };
 }
+
+// Wandering Merchant Catalog & Cart Logic
+export type MerchantItemId = 'torch' | 'potion' | 'weapon' | 'armor' | 'revive';
+
+export interface MerchantItemConfig {
+  id: MerchantItemId;
+  name: string;
+  detail: string;
+  cost: number;
+}
+
+export const MERCHANT_ITEMS: readonly MerchantItemConfig[] = [
+  { id: 'torch', name: 'Torch Tinder', detail: '+3 Torch', cost: 4 },
+  { id: 'potion', name: 'Healing Potion', detail: '+1 Pack', cost: 6 },
+  { id: 'armor', name: 'Knight Armor', detail: '+2 DEF', cost: 10 },
+  { id: 'weapon', name: 'Runic Blade', detail: '+3 ATK', cost: 12 },
+  { id: 'revive', name: 'Phoenix Amulet', detail: '1x Revive', cost: 18 },
+] as const;
+
+export function getMerchantItemById(id: MerchantItemId): MerchantItemConfig | undefined {
+  return MERCHANT_ITEMS.find((item) => item.id === id);
+}
+
+export function calculateMerchantTotalCost(itemIds: MerchantItemId[]): number {
+  return itemIds.reduce((sum, id) => {
+    const item = getMerchantItemById(id);
+    return sum + (item ? item.cost : 0);
+  }, 0);
+}
+
+export function isMerchantItemEligible(
+  item: MerchantItemConfig,
+  player: PlayerState
+): { eligible: boolean; reason?: string } {
+  if (item.id === 'torch' && player.torch >= player.maxTorch) {
+    return { eligible: false, reason: 'MAX TORCH' };
+  }
+  if (item.id === 'potion' && player.potions >= 2) {
+    return { eligible: false, reason: 'PACK FULL' };
+  }
+  if (item.id === 'armor' && player.armor && player.armor.bonus >= 2) {
+    return { eligible: false, reason: 'OWNED' };
+  }
+  if (item.id === 'weapon' && player.weapon && player.weapon.bonus >= 3) {
+    return { eligible: false, reason: 'OWNED' };
+  }
+  if (item.id === 'revive' && player.hasRevive) {
+    return { eligible: false, reason: 'ACTIVE' };
+  }
+  return { eligible: true };
+}
+
+export function applyMerchantPurchases(
+  player: PlayerState,
+  itemIds: MerchantItemId[]
+): {
+  updatedPlayer: PlayerState;
+  totalCost: number;
+  itemNames: string[];
+} {
+  const totalCost = calculateMerchantTotalCost(itemIds);
+  if (totalCost > player.gold) {
+    return { updatedPlayer: player, totalCost: 0, itemNames: [] };
+  }
+
+  const updatedPlayer = { ...player, gold: player.gold - totalCost };
+  const itemNames: string[] = [];
+
+  for (const id of itemIds) {
+    const config = getMerchantItemById(id);
+    if (config) {
+      itemNames.push(config.name);
+    }
+    if (id === 'torch') {
+      updatedPlayer.torch = Math.min(updatedPlayer.maxTorch, updatedPlayer.torch + 3);
+    } else if (id === 'potion') {
+      updatedPlayer.potions = Math.min(2, updatedPlayer.potions + 1);
+    } else if (id === 'armor') {
+      updatedPlayer.armor = { name: 'Knight Armor', bonus: 2, type: 'armor' };
+    } else if (id === 'weapon') {
+      updatedPlayer.weapon = { name: 'Runic Blade', bonus: 3, type: 'weapon' };
+    } else if (id === 'revive') {
+      updatedPlayer.hasRevive = true;
+    }
+  }
+
+  return { updatedPlayer, totalCost, itemNames };
+}
+
