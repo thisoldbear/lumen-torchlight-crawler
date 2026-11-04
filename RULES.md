@@ -1,4 +1,4 @@
-# 🕯️ LUMEN: The Torchlight Catacombs (v1.0.0)
+# 🕯️ LUMEN: The Torchlight Catacombs (v1.0.1)
 ## Complete Physical Tabletop Rules (52-Card Solitaire Crawl)
 
 ---
@@ -72,16 +72,18 @@ Take the 9 cards for the current floor and lay them out in a **3x3 face-down gri
 ### 4. Resolving Encounters
 
 #### ♠ Spades — Monsters & Combat
+> **Important Note:** You do **not** hold or play cards to attack! The 52-card deck represents the dungeon chambers and hazards. Your Hero strikes directly using your character's current stats ($\text{Base ATK} + \text{Equipped Weapon ATK}$).
+
 - **Monster HP** = Card Value ($2–10 = \text{Rank}, J=11, Q=12, K=13, A=15$).
-- **Monster Attack** = Card Value.
+- **Monster Attack** = Card Value (+1 if Torch = 0).
 - **Combat Turns:**
-  1. *Ambush Check:* If you stepped blindly, take:
+  1. *Ambush Check:* If you stepped blindly into an unrevealed room, take:
      $$\text{Ambush Damage} = \max(1, \text{Monster Attack} - \text{Equipped Armor DEF})$$
-  2. *Hero Strike:* Deal damage equal to $\text{Base ATK} + \text{Equipped Weapon ATK}$. Deduct from Monster HP.
-     - If Monster HP $\le 0$, the monster dies! Collect XP equal to $\lceil \text{Rank} / 2 \rceil$. Face cards give 6 XP. Ace gives 8 XP.
-  3. *Monster Counter-Attack:* If alive, the monster deals:
+  2. *Hero Strike:* You strike first (unless ambushed above). Deal damage equal to $\text{Base ATK} + \text{Equipped Weapon ATK}$ directly to Monster HP.
+     - **Instant Slay:** If Monster HP $\le 0$, the monster dies immediately and does **not** counter-attack! Collect XP equal to $\lceil \text{Rank} / 2 \rceil$ (Face cards: 6 XP, Ace: 8 XP).
+  3. *Monster Counter-Attack:* Only if the monster survived your strike, it strikes back:
      $$\text{Damage Taken} = \max(1, \text{Monster Attack} - \text{Equipped Armor DEF})$$
-  4. *Repeat* rounds until one falls.
+  4. *Repeat* rounds until one falls, or take tactical actions (drink a potion, cast Torch Flare at Lvl 4, or flee).
   5. *Tactical Retreat:* You may spend 1 Torch and take 2 direct recoil damage to flee back to your previous tile.
 
 #### ♣ Clubs — Hazards & Timber Salvage

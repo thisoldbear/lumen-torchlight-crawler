@@ -132,6 +132,15 @@ export const DraftModal: React.FC<DraftModalProps> = ({ draftCards, onSelectCard
               <div>• <span style={{ color: 'var(--c-red)' }}>♥ HEARTS (Sanctuaries):</span> Health potions, fairy blessings (+Max HP), campfires (+HP & +Torch), and Revive Tokens.</div>
             </div>
 
+            {/* Combat System Clarity */}
+            <div style={{ marginBottom: '10px' }}>
+              <div style={{ color: 'var(--c-red)', fontWeight: 'bold' }}>⚔️ HOW COMBAT WORKS:</div>
+              <div>• <span style={{ color: 'var(--c-yellow)' }}>NO CARD HAND:</span> Cards represent rooms & monsters, not a hand you play! You attack directly using your Hero's stats (Base ATK + Weapon).</div>
+              <div>• <span style={{ color: 'var(--c-cyan)' }}>HERO STRIKE:</span> Choosing <b>Attack</b> strikes the monster first. If the monster dies from your blow, it is slain instantly and cannot hit back!</div>
+              <div>• <span style={{ color: 'var(--c-red)' }}>RETALIATION:</span> If the monster survives, it counter-attacks: DMG = Monster ATK − Your DEF (min 1).</div>
+              <div>• <span style={{ color: 'var(--c-green)' }}>TACTICAL OPTIONS:</span> Drink a Potion (+8 HP without triggering retaliation), Flee (-1🕯️, -2 HP), or cast Torch Flare (Lvl 4).</div>
+            </div>
+
             {/* Leveling */}
             <div style={{ marginBottom: '14px' }}>
               <div style={{ color: 'var(--c-cyan)', fontWeight: 'bold' }}>⭐ LEVELING UP:</div>
