@@ -4,6 +4,7 @@ import { buildFloorGrid, generateCampaign } from './utils/deck';
 import {
   calculateHeroAttack,
   calculateMonsterAttack,
+  calculateMonsterHp,
   calculateMitigatedDamage,
   calculateTrapDamage,
   calculateXpGain,
@@ -12,7 +13,7 @@ import {
   MerchantItemId,
   applyMerchantPurchases,
   isUnderlordBoss,
-  UNDERLORD_BOSS_CONFIG,
+  getUnderlordStatsForCycle,
   calculateUnderlordDamage,
   canCastTorchFlare,
 } from './utils/rules';
@@ -30,6 +31,7 @@ export const App: React.FC = () => {
   const [floorNum, setFloorNum] = useState<number>(1);
   const [grid, setGrid] = useState<Tile[][]>(() => buildFloorGrid(campaign.floors[0], 1));
   const [stage, setStage] = useState<GameStage>('DRAFT');
+  const [completedCycles, setCompletedCycles] = useState<number>(0);
 
   const [player, setPlayer] = useState<PlayerState>({
     hp: 20,
@@ -47,6 +49,7 @@ export const App: React.FC = () => {
     potions: 1,
     hasRevive: false,
     position: { r: 0, c: 0 },
+    cycle: 1,
   });
 
   const [combat, setCombat] = useState<CombatState | null>(null);
@@ -143,11 +146,14 @@ export const App: React.FC = () => {
     // Encounter Resolution based on Suit
     if (card.suit === 'spades') {
       // Monster / Boss Encounter
-      const isBoss = floorNum === 5 && isUnderlordBoss(card.suit, card.rank);
-      const monsterHp = isBoss ? UNDERLORD_BOSS_CONFIG.phase1Hp : card.numericValue;
+      const isBoss = (floorNum % 5 === 0) && isUnderlordBoss(card.suit, card.rank);
+      const bossStats = getUnderlordStatsForCycle(player.cycle);
+      const monsterHp = isBoss
+        ? bossStats.phase1Hp
+        : calculateMonsterHp(card.numericValue, player.cycle);
       const monsterAtk = isBoss
-        ? UNDERLORD_BOSS_CONFIG.phase1Atk + (player.torch === 0 ? 1 : 0)
-        : calculateMonsterAttack(card.numericValue, player.torch === 0);
+        ? bossStats.phase1Atk + (player.torch === 0 ? player.cycle : 0)
+        : calculateMonsterAttack(card.numericValue, player.torch === 0, player.cycle);
       const isAmbush = blind;
 
       if (isAmbush) {
@@ -165,7 +171,7 @@ export const App: React.FC = () => {
         setPlayer((p) => ({ ...p, hp: remainingHp }));
       } else {
         if (isBoss) {
-          addLog(`💀 THE FINAL SHOWDOWN! ${card.name}: Phase 1 (Slumbering Sovereign - ${monsterHp} HP, ${monsterAtk} ATK)!`, 'danger');
+          addLog(`💀 THE FINAL SHOWDOWN! ${card.name}: Phase 1 (Slumbering Sovereign - ${monsterHp} HP, ${monsterAtk} ATK - Cycle ${player.cycle})!`, 'danger');
         } else {
           addLog(`Encountered ${card.name} (HP: ${monsterHp}, ATK: ${monsterAtk})! Ready your weapon!`, 'combat');
         }
@@ -179,6 +185,7 @@ export const App: React.FC = () => {
         isAmbush,
         bossPhase: isBoss ? 1 : undefined,
         hasUsedTorchFlare: false,
+        cycle: player.cycle,
       });
       setStage('COMBAT');
     } else if (card.suit === 'clubs') {
@@ -196,7 +203,7 @@ export const App: React.FC = () => {
   // Handle Clubs (Traps & Timber)
   const handleClubTrap = (card: Card, r: number, c: number) => {
     const armorDef = player.baseDef + (player.armor?.bonus || 0);
-    const trapDmg = calculateTrapDamage(card.numericValue, armorDef);
+    const trapDmg = calculateTrapDamage(card.numericValue, armorDef, player.cycle);
     const newHp = player.hp - trapDmg;
 
     addLog(`⚠️ Sprung ${card.name}! Took ${trapDmg} damage!`, 'danger');
@@ -346,8 +353,9 @@ export const App: React.FC = () => {
     setCombat(null);
     setStage('EXPLORING');
 
-    // Boss Victory: Defeating Ace of Spades on Floor 5
-    if (floorNum === 5 && monsterCard.suit === 'spades' && monsterCard.rank === 'A') {
+    // Boss Victory: Defeating Ace of Spades at end of cycle (Floor 5, 10, 15...)
+    if (floorNum % 5 === 0 && monsterCard.suit === 'spades' && monsterCard.rank === 'A') {
+      setCompletedCycles((c) => Math.max(c + 1, player.cycle));
       setStage('VICTORY');
     }
   };
@@ -364,19 +372,21 @@ export const App: React.FC = () => {
     if (newMonsterHp <= 0) {
       if (combat.bossPhase === 1) {
         // Transition to Phase 2: The Void Unleashed
-        const transitionDmg = UNDERLORD_BOSS_CONFIG.phaseTransitionDmg;
+        const combatCycle = combat.cycle || player.cycle;
+        const bossStats = getUnderlordStatsForCycle(combatCycle);
+        const transitionDmg = bossStats.phaseTransitionDmg;
         const newHeroHp = player.hp - transitionDmg;
 
         addLog(`💥 THE SLUMBERING SOVEREIGN SHATTERS!`, 'combat');
-        addLog(`⚠️ PHASE 2: THE VOID UNLEASHED! The Underlord awakens with ${UNDERLORD_BOSS_CONFIG.phase2Hp} HP, ${UNDERLORD_BOSS_CONFIG.phase2Atk} ATK & Crushing Ruin!`, 'danger');
+        addLog(`⚠️ PHASE 2: THE VOID UNLEASHED! The Underlord awakens with ${bossStats.phase2Hp} HP, ${bossStats.phase2Atk} ATK & Crushing Ruin (Cycle ${combatCycle})!`, 'danger');
         addLog(`⚡ Abyssal Shockwave deals ${transitionDmg} unavoidable damage!`, 'danger');
 
-        const phase2Atk = UNDERLORD_BOSS_CONFIG.phase2Atk + (player.torch === 0 ? 1 : 0);
+        const phase2Atk = bossStats.phase2Atk + (player.torch === 0 ? combatCycle : 0);
         setCombat((c) => (c ? {
           ...c,
           bossPhase: 2,
-          monsterHp: UNDERLORD_BOSS_CONFIG.phase2Hp,
-          monsterMaxHp: UNDERLORD_BOSS_CONFIG.phase2Hp,
+          monsterHp: bossStats.phase2Hp,
+          monsterMaxHp: bossStats.phase2Hp,
           monsterAtk: phase2Atk,
         } : null));
 
@@ -395,7 +405,7 @@ export const App: React.FC = () => {
     // Monster strikes back
     const armorDef = player.baseDef + (player.armor?.bonus || 0);
     const monsterDmg = combat.bossPhase === 2
-      ? calculateUnderlordDamage(2, combat.monsterAtk, armorDef)
+      ? calculateUnderlordDamage(2, combat.monsterAtk, armorDef, combat.cycle || player.cycle)
       : calculateMitigatedDamage(combat.monsterAtk, armorDef);
     const newHeroHp = player.hp - monsterDmg;
 
@@ -479,14 +489,15 @@ export const App: React.FC = () => {
 
   // Descend to Next Floor
   const handleDescend = () => {
-    if (floorNum >= 5) {
+    if (floorNum % 5 === 0) {
       setStage('VICTORY');
       return;
     }
 
     const nextFloor = floorNum + 1;
+    const floorIndex = (nextFloor - 1) % 5;
     setFloorNum(nextFloor);
-    setGrid(buildFloorGrid(campaign.floors[nextFloor - 1], nextFloor));
+    setGrid(buildFloorGrid(campaign.floors[floorIndex], nextFloor));
 
     const { newHp, healed } = calculateFloorTransitionHeal(player.hp, player.maxHp);
     setPlayer((p) => ({ ...p, hp: newHp, position: { r: 0, c: 0 } }));
@@ -496,9 +507,35 @@ export const App: React.FC = () => {
       addLog(`🌿 Caught your breath on the stairs: Field dressing restored +${healed} HP!`, 'heal');
     }
 
-    // Wandering Merchant chance between floors
-    if (nextFloor === 3) {
+    // Wandering Merchant chance between floors (Floor 3 of every cycle)
+    if (floorIndex === 2) {
       setStage('MERCHANT');
+    }
+  };
+
+  // Delve into the Abyss (Enter Next Cycle Loop)
+  const handleDelveIntoAbyss = () => {
+    const nextCycle = player.cycle + 1;
+    const nextFloor = floorNum + 1;
+    const newCamp = generateCampaign();
+
+    setCampaign(newCamp);
+    setFloorNum(nextFloor);
+    setGrid(buildFloorGrid(newCamp.floors[0], nextFloor));
+
+    const { newHp, healed } = calculateFloorTransitionHeal(player.hp, player.maxHp);
+    setPlayer((p) => ({
+      ...p,
+      cycle: nextCycle,
+      hp: newHp,
+      position: { r: 0, c: 0 },
+    }));
+
+    setStage('EXPLORING');
+    addLog(`🌀 THE ABYSS CONSUMES YOU! Entering Cycle ${nextCycle} (Floor ${nextFloor})...`, 'danger');
+    addLog(`🔥 Monsters grow fiercer (+${(nextCycle - 1) * 2} ATK, +${(nextCycle - 1) * 5} HP). Hold fast to your torch!`, 'neutral');
+    if (healed > 0) {
+      addLog(`🌿 Field dressing on the abyss threshold restored +${healed} HP!`, 'heal');
     }
   };
 
@@ -521,6 +558,7 @@ export const App: React.FC = () => {
     const newCamp = generateCampaign();
     setCampaign(newCamp);
     setFloorNum(1);
+    setCompletedCycles(0);
     setGrid(buildFloorGrid(newCamp.floors[0], 1));
     setPlayer({
       hp: 20,
@@ -538,6 +576,7 @@ export const App: React.FC = () => {
       potions: 1,
       hasRevive: false,
       position: { r: 0, c: 0 },
+      cycle: 1,
     });
     setCombat(null);
     setStage('DRAFT');
@@ -623,7 +662,9 @@ export const App: React.FC = () => {
           isVictory={stage === 'VICTORY'}
           player={player}
           floor={floorNum}
+          completedCycles={completedCycles}
           onRestart={handleRestart}
+          onDelveIntoAbyss={handleDelveIntoAbyss}
         />
       )}
 

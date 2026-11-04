@@ -91,6 +91,49 @@ describe('Progression, Scoring & Navigation Hardening', () => {
       // Gold: 0*3 + Level: 1*25 + Floor: 1*30 = 55
       expect(score).toBe(55);
     });
+
+    it('multiplies legacy score for multi-cycle victories (1.5x for Cycle 2, 2.0x for Cycle 3)', () => {
+      const scoreCycle2 = calculateLegacyScore({
+        isVictory: true,
+        hp: 15,
+        gold: 24,
+        level: 3,
+        weaponBonus: 3,
+        floor: 10,
+        completedCycles: 2,
+      });
+
+      // Base: 680 + (2 - 1)*500 = 1180. Multiplier: 1 + 0.5 = 1.5 -> 1180 * 1.5 = 1770
+      expect(scoreCycle2).toBe(1770);
+
+      const scoreCycle3 = calculateLegacyScore({
+        isVictory: true,
+        hp: 15,
+        gold: 24,
+        level: 3,
+        weaponBonus: 3,
+        floor: 15,
+        completedCycles: 3,
+      });
+
+      // Base: 680 + (3 - 1)*500 = 1680. Multiplier: 1 + 1.0 = 2.0 -> 1680 * 2.0 = 3360
+      expect(scoreCycle3).toBe(3360);
+    });
+
+    it('banks points for previously completed cycles upon defeat in deep cycles', () => {
+      const defeatScore = calculateLegacyScore({
+        isVictory: false,
+        hp: 0,
+        gold: 10,
+        level: 2,
+        weaponBonus: 1,
+        floor: 8,
+        completedCycles: 1,
+      });
+
+      // Base: (10 * 3) + (2 * 25) + (8 * 30) = 30 + 50 + 240 = 320. Plus 1 * 400 = 720
+      expect(defeatScore).toBe(720);
+    });
   });
 
   describe('isOrthogonallyAdjacent Navigation Rule', () => {

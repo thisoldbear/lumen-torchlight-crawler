@@ -144,12 +144,19 @@ export const DraftModal: React.FC<DraftModalProps> = ({ draftCards, onSelectCard
             </div>
 
             {/* Leveling */}
-            <div style={{ marginBottom: '14px' }}>
+            <div style={{ marginBottom: '10px' }}>
               <div style={{ color: 'var(--c-cyan)', fontWeight: 'bold' }}>⭐ LEVELING UP:</div>
               <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 1 (Start):</span> 3 Base ATK, 0 DEF, 20 Max HP</div>
               <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 2 (10 XP):</span> +5 Max HP, heal 5 HP, Base ATK increases to 4</div>
               <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 3 (25 XP):</span> +5 Max HP, Base DEF increases to 1</div>
               <div>• <span style={{ color: 'var(--c-cyan)' }}>Lvl 4 (45 XP):</span> Base ATK increases to 5, unlock <span style={{ color: 'var(--c-yellow)' }}>Torch Flare</span> (spend 2 Torch for 6 instant fire damage; 1x per battle)</div>
+            </div>
+
+            {/* Abyssal Cycles */}
+            <div style={{ marginBottom: '14px' }}>
+              <div style={{ color: 'var(--c-yellow)', fontWeight: 'bold' }}>🌀 ABYSSAL CYCLES (INFINITE PLAY):</div>
+              <div>• Vanquishing The Underlord unlocks the choice to <b>Retire with Glory</b> or <b>Delve into the Abyss</b>!</div>
+              <div>• Delving reshuffles all 52 cards into a new 5-floor cycle. Keep your hero gear, level, and gold while facing scaled monsters (+ATK/+HP) for massive score multipliers (1.5x, 2.0x)!</div>
             </div>
 
             <button

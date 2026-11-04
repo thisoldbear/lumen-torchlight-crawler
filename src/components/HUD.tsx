@@ -26,10 +26,17 @@ export const HUD: React.FC<HUDProps> = ({
 
   return (
     <div className="pixel-panel" style={{ marginBottom: '14px' }}>
-      {/* Top Header: Floor Title */}
-      <div style={{ marginBottom: '8px' }}>
-        <span style={{ color: 'var(--c-yellow)', fontSize: '10px' }}>FLOOR {floor}/5: </span>
-        <span style={{ color: 'var(--c-white)', fontSize: '9px' }}>{FLOOR_NAMES[floor - 1]}</span>
+      {/* Top Header: Floor Title & Cycle */}
+      <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <span style={{ color: 'var(--c-yellow)', fontSize: '10px' }}>FLOOR {floor}: </span>
+          <span style={{ color: 'var(--c-white)', fontSize: '9px' }}>{FLOOR_NAMES[(floor - 1) % 5]}</span>
+        </div>
+        {player.cycle > 1 && (
+          <div style={{ fontSize: '8px', color: 'var(--c-cyan)', border: '1px solid var(--c-cyan)', padding: '2px 6px' }}>
+            🌀 CYCLE {player.cycle}
+          </div>
+        )}
       </div>
 
       {/* Main Stats Grid */}

@@ -41,6 +41,7 @@ export interface PlayerState {
   potions: number; // Consumable count (max 2)
   hasRevive: boolean;
   position: { r: number; c: number };
+  cycle: number; // Current Abyssal Cycle (1 = Base, 2 = Floors 6-10, etc.)
 }
 
 export interface CombatState {
@@ -51,6 +52,7 @@ export interface CombatState {
   isAmbush: boolean;
   bossPhase?: 1 | 2;
   hasUsedTorchFlare?: boolean;
+  cycle?: number;
 }
 
 export type GameStage = 

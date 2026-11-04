@@ -154,6 +154,35 @@ When visiting the merchant (Jack ♦ or between floors):
 
 ---
 
+### 8. The Abyssal Cycles (Infinite Playability & Push-Your-Luck Ascension)
+
+When you vanquish The Underlord on Floor 5 (or the final floor of any cycle), you reach a high-tension crossroad:
+
+#### Option A: Retire with Glory (Cash Out)
+Conclude the expedition, claim victory, and tally your final Legacy Score.
+
+#### Option B: Delve into the Abyss (Enter Cycle $C + 1$)
+Plunge deeper into the catacombs with scaled hazards, escalating bosses, and an increasing Legacy Score multiplier!
+
+1. **The 30-Second Reset Ritual:**
+   - **Retain Hero State:** Keep your current Level, Base ATK, Base DEF, equipped Weapon, Armor, Gold purse, remaining Potions, and active Revive Ward. Record `Cycle = Cycle + 1`.
+   - **Gather All 52 Cards:** Collect all floor cards, discard piles, and merchant cards.
+   - **Extract The Underlord:** Find and set aside the **Ace of Spades ♠**.
+   - **Shuffle & Partition:** Shuffle the remaining 51 cards. Deal the 3-card Draft (choose 1 boon), deal 4 floor piles of 9 cards (Floors 6–9), shuffle the Ace of Spades into the 5th floor pile (Floor 10 Sanctum), and set aside 4 merchant cards.
+   - **Field Dressing:** Restore **+10 HP** (up to Max HP) as you cross the threshold into the new Cycle!
+2. **Mental-Math Tabletop Scaling ($C$ = Current Cycle Number):**
+   - **Monster HP:** $\text{Rank} + (C - 1) \times 5$
+   - **Monster ATK:** $\lceil \text{Rank} / 2 \rceil + (C - 1) \times 2$ (+Cycle in Pitch Black)
+   - **Trap Damage (Clubs ♣):** $+(C - 1)$ direct hazard damage before DEF
+   - **The Underlord:** Gains $+10\text{ HP}$ per phase and $+2\text{ ATK}$ per cycle ($30\text{ HP}$ / $10\text{ ATK}$ in Cycle 2, $40\text{ HP}$ / $12\text{ ATK}$ in Cycle 3). Crushing Ruin pierce increases by $+1$ per cycle.
+3. **Abyssal Legacy Multiplier:**
+   - **Cycle 1 Victory:** Base Score ($\times 1.0$)
+   - **Cycle 2 Victory:** Base Score $+ 500 \text{ pts} \times 1.5$ multiplier
+   - **Cycle 3 Victory:** Base Score $+ 1000 \text{ pts} \times 2.0$ multiplier
+   - **Fallen in the Abyss:** If defeated in Cycle $C > 1$, add **+400 PTS** for every previously completed cycle so risking the Abyss is never unrewarded!
+
+---
+
 ## 📜 Copyright & Attribution
 
 *LUMEN: The Torchlight Catacombs* is created and authored by **Daniel Williams**.  

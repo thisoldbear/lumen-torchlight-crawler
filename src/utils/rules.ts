@@ -6,17 +6,33 @@ export function calculateHeroAttack(baseAtk: number, weaponBonus: number = 0): n
   return Math.max(1, baseAtk + weaponBonus);
 }
 
-export function calculateMonsterAttack(cardNumericValue: number, isPitchBlack: boolean = false): number {
-  const baseAtk = Math.max(1, Math.ceil(cardNumericValue / 2));
-  return baseAtk + (isPitchBlack ? 1 : 0);
+export function calculateMonsterHp(cardNumericValue: number, cycle: number = 1): number {
+  const cycleBonus = Math.max(0, cycle - 1) * 5;
+  return Math.max(1, cardNumericValue + cycleBonus);
+}
+
+export function calculateMonsterAttack(
+  cardNumericValue: number,
+  isPitchBlack: boolean = false,
+  cycle: number = 1
+): number {
+  const cycleBonus = Math.max(0, cycle - 1) * 2;
+  const baseAtk = Math.max(1, Math.ceil(cardNumericValue / 2) + cycleBonus);
+  return baseAtk + (isPitchBlack ? cycle : 0);
 }
 
 export function calculateMitigatedDamage(incomingAtk: number, defense: number = 0): number {
   return Math.max(1, incomingAtk - Math.max(0, defense));
 }
 
-export function calculateTrapDamage(cardValue: number, defense: number = 0): number {
-  return Math.max(1, Math.floor(cardValue / 2) - Math.max(0, defense));
+export function calculateTrapDamage(
+  cardValue: number,
+  defense: number = 0,
+  cycle: number = 1
+): number {
+  const cycleBonus = Math.max(0, cycle - 1);
+  const baseTrap = Math.floor(cardValue / 2) + cycleBonus;
+  return Math.max(1, baseTrap - Math.max(0, defense));
 }
 
 export function calculateXpGain(cardNumericValue: number): number {
@@ -62,30 +78,40 @@ export function evaluateLevelUp(currentXp: number, currentLvl: number): LevelUpR
   return { lvl, nextXp, hpBoost, atkBoost, defBoost, hasLeveledUp };
 }
 
-export function calculateLegacyScore(params: {
+export interface LegacyScoreParams {
   isVictory: boolean;
   hp: number;
   gold: number;
   level: number;
   weaponBonus: number;
   floor: number;
-}): number {
+  completedCycles?: number;
+}
+
+export function calculateLegacyScore(params: LegacyScoreParams): number {
   const safeHp = Math.max(0, params.hp);
   const safeGold = Math.max(0, params.gold);
   const safeLevel = Math.max(1, params.level);
   const safeWeapon = Math.max(0, params.weaponBonus);
   const safeFloor = Math.max(1, params.floor);
+  const completedCycles = Math.max(0, params.completedCycles ?? (params.isVictory ? 1 : 0));
 
   if (params.isVictory) {
-    return (
+    const cycleBonus = Math.max(0, completedCycles - 1) * 500;
+    const baseVictory = (
       safeHp * 10 +
       safeGold * 5 +
       safeLevel * 50 +
       safeWeapon * 20 +
-      200
+      200 +
+      cycleBonus
     );
+    const multiplier = 1 + Math.max(0, completedCycles - 1) * 0.5;
+    return Math.round(baseVictory * multiplier);
   }
-  return safeGold * 3 + safeLevel * 25 + safeFloor * 30;
+
+  const baseDefeat = safeGold * 3 + safeLevel * 25 + safeFloor * 30;
+  return baseDefeat + completedCycles * 400;
 }
 
 export function isOrthogonallyAdjacent(r1: number, c1: number, r2: number, c2: number): boolean {
@@ -134,14 +160,29 @@ export function isUnderlordBoss(cardSuit: string, cardRank: string | number): bo
   return cardSuit === 'spades' && cardRank === 'A';
 }
 
+export function getUnderlordStatsForCycle(cycle: number = 1): UnderlordBossConfig {
+  const c = Math.max(1, cycle);
+  const cycleMultiplier = c - 1;
+  return {
+    phase1Hp: UNDERLORD_BOSS_CONFIG.phase1Hp + cycleMultiplier * 10,
+    phase1Atk: UNDERLORD_BOSS_CONFIG.phase1Atk + cycleMultiplier * 2,
+    phase2Hp: UNDERLORD_BOSS_CONFIG.phase2Hp + cycleMultiplier * 10,
+    phase2Atk: UNDERLORD_BOSS_CONFIG.phase2Atk + cycleMultiplier * 2,
+    phaseTransitionDmg: UNDERLORD_BOSS_CONFIG.phaseTransitionDmg + cycleMultiplier,
+    minPierceDmg: UNDERLORD_BOSS_CONFIG.minPierceDmg + cycleMultiplier,
+  };
+}
+
 export function calculateUnderlordDamage(
   phase: 1 | 2,
   incomingAtk: number,
-  defense: number = 0
+  defense: number = 0,
+  cycle: number = 1
 ): number {
   if (phase === 2) {
-    // Crushing Ruin: Attacks bypass armor with minimum 3 unmitigated damage
-    return Math.max(UNDERLORD_BOSS_CONFIG.minPierceDmg, incomingAtk - Math.max(0, defense));
+    const stats = getUnderlordStatsForCycle(cycle);
+    // Crushing Ruin: Attacks bypass armor with scaled minimum unmitigated damage
+    return Math.max(stats.minPierceDmg, incomingAtk - Math.max(0, defense));
   }
   return calculateMitigatedDamage(incomingAtk, defense);
 }

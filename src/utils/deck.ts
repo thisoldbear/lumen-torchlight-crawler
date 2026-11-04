@@ -122,8 +122,8 @@ export function buildFloorGrid(floorCards: Card[], floorNum: number): Tile[][] {
       const isStairs = r === 2 && c === 2;
       
       let card: Card;
-      if (floorNum === 5 && isStairs) {
-        // Guarantee Boss is at Stairs in Floor 5
+      if (floorNum % 5 === 0 && isStairs) {
+        // Guarantee Boss is at Stairs in the final floor of every Cycle
         const boss = floorCards.find(card => card.suit === 'spades' && card.rank === 'A') || floorCards[cardIdx++];
         card = boss;
       } else {

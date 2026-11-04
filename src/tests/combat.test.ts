@@ -2,12 +2,14 @@ import { describe, it, expect } from 'vitest';
 import {
   calculateHeroAttack,
   calculateMonsterAttack,
+  calculateMonsterHp,
   calculateMitigatedDamage,
   calculateTrapDamage,
   calculateXpGain,
   UNDERLORD_BOSS_CONFIG,
   isUnderlordBoss,
   calculateUnderlordDamage,
+  getUnderlordStatsForCycle,
   canCastTorchFlare,
 } from '../utils/rules';
 
@@ -44,9 +46,34 @@ describe('Combat Engine Hardening & Math Boundaries', () => {
       expect(calculateMonsterAttack(15, true)).toBe(9);
     });
 
+    it('scales monster attack with Abyssal Cycles (+2 ATK per cycle above 1)', () => {
+      // Cycle 2: rank 6 -> ceil(6/2) + (2-1)*2 = 3 + 2 = 5
+      expect(calculateMonsterAttack(6, false, 2)).toBe(5);
+      // Cycle 3: rank 6 -> 3 + 4 = 7
+      expect(calculateMonsterAttack(6, false, 3)).toBe(7);
+      // Cycle 2 pitch black: 5 + 2 = 7
+      expect(calculateMonsterAttack(6, true, 2)).toBe(7);
+    });
+
     it('guarantees minimum attack of 1 for edge or negative values', () => {
       expect(calculateMonsterAttack(0)).toBe(1);
       expect(calculateMonsterAttack(-4)).toBe(1);
+    });
+  });
+
+  describe('calculateMonsterHp Cycle Scaling', () => {
+    it('returns exact card rank in Cycle 1', () => {
+      expect(calculateMonsterHp(6, 1)).toBe(6);
+      expect(calculateMonsterHp(13, 1)).toBe(13);
+    });
+
+    it('scales monster HP with Abyssal Cycles (+5 HP per cycle above 1)', () => {
+      // Cycle 2: rank 6 -> 6 + 5 = 11
+      expect(calculateMonsterHp(6, 2)).toBe(11);
+      // Cycle 3: rank 6 -> 6 + 10 = 16
+      expect(calculateMonsterHp(6, 3)).toBe(16);
+      // Cycle 2: rank 13 -> 13 + 5 = 18
+      expect(calculateMonsterHp(13, 2)).toBe(18);
     });
   });
 
@@ -81,6 +108,13 @@ describe('Combat Engine Hardening & Math Boundaries', () => {
     it('always deals at least 1 damage on trap triggers', () => {
       expect(calculateTrapDamage(2, 5)).toBe(1);
       expect(calculateTrapDamage(5, 10)).toBe(1);
+    });
+
+    it('scales trap damage with Abyssal Cycles (+1 direct hazard damage per cycle above 1)', () => {
+      // Cycle 2: floor(6/2) + 1 - 1 DEF = 3 + 1 - 1 = 3
+      expect(calculateTrapDamage(6, 1, 2)).toBe(3);
+      // Cycle 3: 3 + 2 - 1 DEF = 4
+      expect(calculateTrapDamage(6, 1, 3)).toBe(4);
     });
   });
 
@@ -129,6 +163,20 @@ describe('Combat Engine Hardening & Math Boundaries', () => {
       expect(calculateUnderlordDamage(2, 10, 8)).toBe(3);
       // 10 ATK vs 99 DEF = max(3, 10 - 99) = 3 DMG
       expect(calculateUnderlordDamage(2, 10, 99)).toBe(3);
+    });
+
+    it('scales Underlord Boss stats and Crushing Ruin pierce in Abyssal Cycles', () => {
+      const statsC2 = getUnderlordStatsForCycle(2);
+      expect(statsC2.phase1Hp).toBe(30);
+      expect(statsC2.phase1Atk).toBe(10);
+      expect(statsC2.phase2Hp).toBe(30);
+      expect(statsC2.phase2Atk).toBe(12);
+      expect(statsC2.phaseTransitionDmg).toBe(4);
+      expect(statsC2.minPierceDmg).toBe(4);
+
+      // In Cycle 2, Crushing Ruin deals minimum 4 pierce damage
+      expect(calculateUnderlordDamage(2, 12, 10, 2)).toBe(4);
+      expect(calculateUnderlordDamage(2, 12, 99, 2)).toBe(4);
     });
   });
 
