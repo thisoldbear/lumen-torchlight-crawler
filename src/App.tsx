@@ -11,6 +11,10 @@ import {
   calculateFloorTransitionHeal,
   MerchantItemId,
   applyMerchantPurchases,
+  isUnderlordBoss,
+  UNDERLORD_BOSS_CONFIG,
+  calculateUnderlordDamage,
+  canCastTorchFlare,
 } from './utils/rules';
 import { HUD } from './components/HUD';
 import { DungeonGrid } from './components/DungeonGrid';
@@ -138,9 +142,12 @@ export const App: React.FC = () => {
 
     // Encounter Resolution based on Suit
     if (card.suit === 'spades') {
-      // Monster Encounter
-      const monsterHp = card.numericValue;
-      const monsterAtk = calculateMonsterAttack(card.numericValue, player.torch === 0);
+      // Monster / Boss Encounter
+      const isBoss = floorNum === 5 && isUnderlordBoss(card.suit, card.rank);
+      const monsterHp = isBoss ? UNDERLORD_BOSS_CONFIG.phase1Hp : card.numericValue;
+      const monsterAtk = isBoss
+        ? UNDERLORD_BOSS_CONFIG.phase1Atk + (player.torch === 0 ? 1 : 0)
+        : calculateMonsterAttack(card.numericValue, player.torch === 0);
       const isAmbush = blind;
 
       if (isAmbush) {
@@ -157,7 +164,11 @@ export const App: React.FC = () => {
 
         setPlayer((p) => ({ ...p, hp: remainingHp }));
       } else {
-        addLog(`Encountered ${card.name} (HP: ${monsterHp}, ATK: ${monsterAtk})! Ready your weapon!`, 'combat');
+        if (isBoss) {
+          addLog(`💀 THE FINAL SHOWDOWN! ${card.name}: Phase 1 (Slumbering Sovereign - ${monsterHp} HP, ${monsterAtk} ATK)!`, 'danger');
+        } else {
+          addLog(`Encountered ${card.name} (HP: ${monsterHp}, ATK: ${monsterAtk})! Ready your weapon!`, 'combat');
+        }
       }
 
       setCombat({
@@ -166,6 +177,8 @@ export const App: React.FC = () => {
         monsterMaxHp: monsterHp,
         monsterAtk,
         isAmbush,
+        bossPhase: isBoss ? 1 : undefined,
+        hasUsedTorchFlare: false,
       });
       setStage('COMBAT');
     } else if (card.suit === 'clubs') {
@@ -349,13 +362,41 @@ export const App: React.FC = () => {
     addLog(`⚔️ You struck ${combat.monsterCard.name} for ${heroAtk} damage!`, 'combat');
 
     if (newMonsterHp <= 0) {
+      if (combat.bossPhase === 1) {
+        // Transition to Phase 2: The Void Unleashed
+        const transitionDmg = UNDERLORD_BOSS_CONFIG.phaseTransitionDmg;
+        const newHeroHp = player.hp - transitionDmg;
+
+        addLog(`💥 THE SLUMBERING SOVEREIGN SHATTERS!`, 'combat');
+        addLog(`⚠️ PHASE 2: THE VOID UNLEASHED! The Underlord awakens with ${UNDERLORD_BOSS_CONFIG.phase2Hp} HP, ${UNDERLORD_BOSS_CONFIG.phase2Atk} ATK & Crushing Ruin!`, 'danger');
+        addLog(`⚡ Abyssal Shockwave deals ${transitionDmg} unavoidable damage!`, 'danger');
+
+        const phase2Atk = UNDERLORD_BOSS_CONFIG.phase2Atk + (player.torch === 0 ? 1 : 0);
+        setCombat((c) => (c ? {
+          ...c,
+          bossPhase: 2,
+          monsterHp: UNDERLORD_BOSS_CONFIG.phase2Hp,
+          monsterMaxHp: UNDERLORD_BOSS_CONFIG.phase2Hp,
+          monsterAtk: phase2Atk,
+        } : null));
+
+        if (newHeroHp <= 0) {
+          handlePlayerDeath();
+        } else {
+          setPlayer((p) => ({ ...p, hp: newHeroHp }));
+        }
+        return;
+      }
+
       handleMonsterDefeat(combat.monsterCard);
       return;
     }
 
     // Monster strikes back
     const armorDef = player.baseDef + (player.armor?.bonus || 0);
-    const monsterDmg = calculateMitigatedDamage(combat.monsterAtk, armorDef);
+    const monsterDmg = combat.bossPhase === 2
+      ? calculateUnderlordDamage(2, combat.monsterAtk, armorDef)
+      : calculateMitigatedDamage(combat.monsterAtk, armorDef);
     const newHeroHp = player.hp - monsterDmg;
 
     addLog(`🩸 ${combat.monsterCard.name} hit back for ${monsterDmg} damage!`, 'combat');
@@ -371,7 +412,15 @@ export const App: React.FC = () => {
 
   // Torch Flare (Lvl 4 skill)
   const handleTorchFlare = () => {
-    if (!combat || player.torch < 2) return;
+    if (!combat) return;
+
+    const flareCheck = canCastTorchFlare({
+      level: player.level,
+      torch: player.torch,
+      hasUsedInCombat: combat.hasUsedTorchFlare,
+      bossPhase: combat.bossPhase,
+    });
+    if (!flareCheck.canCast) return;
 
     addLog(`🔥 Unleashed Torch Flare! Blasted 6 instant fire damage!`, 'combat');
     setPlayer((p) => ({ ...p, torch: p.torch - 2 }));
@@ -380,7 +429,7 @@ export const App: React.FC = () => {
     if (newMonsterHp <= 0) {
       handleMonsterDefeat(combat.monsterCard);
     } else {
-      setCombat((c) => (c ? { ...c, monsterHp: newMonsterHp } : null));
+      setCombat((c) => (c ? { ...c, monsterHp: newMonsterHp, hasUsedTorchFlare: true } : null));
     }
   };
 
@@ -444,7 +493,7 @@ export const App: React.FC = () => {
 
     addLog(`▼ Descended into Floor ${nextFloor}! Light fades further...`, 'neutral');
     if (healed > 0) {
-      addLog(`🌿 Caught your breath on the stairs: HP restored to full (+${healed} HP)!`, 'heal');
+      addLog(`🌿 Caught your breath on the stairs: Field dressing restored +${healed} HP!`, 'heal');
     }
 
     // Wandering Merchant chance between floors

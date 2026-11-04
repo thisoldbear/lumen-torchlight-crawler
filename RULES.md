@@ -1,4 +1,4 @@
-# 🕯️ LUMEN: The Torchlight Catacombs (v1.2.0)
+# 🕯️ LUMEN: The Torchlight Catacombs (v1.3.0)
 ## Complete Physical Tabletop Rules (52-Card Solitaire Crawl)
 
 ---
@@ -75,17 +75,22 @@ Take the 9 cards for the current floor and lay them out in a **3x3 face-down gri
 #### ♠ Spades — Monsters & Combat
 > **Important Note:** You do **not** hold or play cards to attack! The 52-card deck represents the dungeon chambers and hazards. Your Hero strikes directly using your character's current stats ($\text{Base ATK} + \text{Equipped Weapon ATK}$).
 
-- **Monster HP** = Card Value ($2–10 = \text{Rank}, J=11, Q=12, K=13, A=15$).
+- **Monster HP** = Card Value ($2–10 = \text{Rank}, J=11, Q=12, K=13$).
 - **Monster Attack** = $\lceil \text{Card Value} / 2 \rceil$ (+1 if Torch = 0 / Pitch Black).
-  *(e.g., Rank 2 = 1 ATK, Rank 3 = 2 ATK, Rank 10 = 5 ATK, Face cards = 6–7 ATK, Underlord Ace = 8 ATK).*
+  *(e.g., Rank 2 = 1 ATK, Rank 3 = 2 ATK, Rank 10 = 5 ATK, Face cards = 6–7 ATK).*
+- **Floor 5 Final Boss — Ace of Spades ♠ (The Underlord Awakened):**
+  The Underlord is a menacing two-phase encounter (track on paper as `[20] | [20]`):
+  - **Phase 1: Slumbering Sovereign (20 HP, 8 ATK):** The mortal vessel. Protected by a *Void Shroud* that absorbs fire (immune to Torch Flare).
+  - **Phase 2: The Void Unleashed (20 HP, 10 ATK):** Triggered when Phase 1 reaches 0 HP. The Underlord unleashes an abyssal roar dealing **3 unavoidable direct damage**, and gains *Crushing Ruin* ($\max(3, 10 - \text{Equipped Armor DEF})$)—strikes deal a minimum of 3 damage even through heavy plate!
 - **Combat Turns:**
   1. *Ambush Check:* If you stepped blindly into an unrevealed room, take:
      $$\text{Ambush Damage} = \max(1, \text{Monster Attack} - \text{Equipped Armor DEF})$$
   2. *Hero Strike:* You strike first (unless ambushed above). Deal damage equal to $\text{Base ATK} + \text{Equipped Weapon ATK}$ directly to Monster HP.
-     - **Instant Slay:** If Monster HP $\le 0$, the monster dies immediately and does **not** counter-attack! Collect XP equal to $\lceil \text{Rank} / 2 \rceil$ (Face cards: 6 XP, Ace: 8 XP).
+     - **Instant Slay:** If Monster HP $\le 0$, the monster dies immediately and does **not** counter-attack (or triggers Phase 2 for The Underlord)! Collect XP equal to $\lceil \text{Rank} / 2 \rceil$ (Face cards: 6 XP, Ace: 8 XP).
   3. *Monster Counter-Attack:* Only if the monster survived your strike, it strikes back:
      $$\text{Damage Taken} = \max(1, \text{Monster Attack} - \text{Equipped Armor DEF})$$
-  4. *Repeat* rounds until one falls, or take tactical actions (drink a potion, cast Torch Flare at Lvl 4, or flee).
+     *(Note: Phase 2 Underlord uses Crushing Ruin minimum 3 damage).*
+  4. *Tactical Actions:* Drink a potion (+8 HP without enemy retaliation), cast Torch Flare at Lvl 4 (6 damage, limited to 1x per battle), or flee.
   5. *Tactical Retreat:* You may spend 1 Torch and take 2 direct recoil damage to flee back to your previous tile.
   6. *Strategy — Fight vs. Flee:*
      - **Fight for Growth:** Monsters are your only source of XP to level up, gain Max HP, unlock natural DEF, and prepare for The Underlord. Defeating a monster also clears the chamber for safe transit.
@@ -120,7 +125,7 @@ Defeating Spades awards XP. When XP reaches the threshold, level up immediately:
 | **Level 1** | 0 XP | Base ATK: 3, Base DEF: 0, Max HP: 20, Max Torch: 8 |
 | **Level 2** | 10 XP | +5 Max HP, Instant +5 Heal, Base ATK increases to 4 |
 | **Level 3** | 25 XP | +5 Max HP, Base DEF increases to 1 |
-| **Level 4** | 45 XP | Base ATK increases to 5, Unlock **Torch Flare** (Spend 2 Torch for 6 instant fire damage) |
+| **Level 4** | 45 XP | Base ATK increases to 5, Unlock **Torch Flare** (Spend 2 Torch for 6 instant fire damage; 1x per battle) |
 
 ---
 
@@ -133,14 +138,16 @@ When visiting the merchant (Jack ♦ or between floors):
 - **Runic Blade (+3 ATK):** 12 Gold
 - **Phoenix Amulet (Revive Token):** 18 Gold
 
+*(You may select multiple items to buy in a single transaction as long as you have sufficient Gold. Deduct the total cost from your tracker and update your gear before continuing your expedition).*
+
 ---
 
 ### 7. Descending Floors & Game End
 
 1. Clear or defeat the tile at **Stairs `(2,2)`**.
-2. **Catch Your Breath:** When descending the stairs into a new floor, catch your breath to restore your **HP back to full (Max HP)**!
+2. **Catch Your Breath (Field Dressing):** When descending the stairs into a new floor, apply field dressing to restore **+10 HP** (up to your Max HP)!
 3. Advance to the next Floor pile (gather the previous floor cards into the discard pile).
-4. **Floor 5 Boss:** On Floor 5, the **Ace of Spades ♠ (The Underlord: 15 HP, 15 DMG)** is waiting.
+4. **Floor 5 Boss:** On Floor 5, the **Ace of Spades ♠ (The Underlord: Two Phases, 20 HP / 8 ATK $\to$ 20 HP / 10 ATK)** is waiting.
 5. **Victory:** Defeat The Underlord on Floor 5!
 6. **Legacy Score Calculation:**
    $$\text{Final Score} = (\text{HP} \times 10) + (\text{Gold} \times 5) + (\text{Level} \times 50) + (\text{Weapon ATK} \times 20) + 200 \text{ (Clear Bonus)}$$

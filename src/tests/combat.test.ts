@@ -5,6 +5,10 @@ import {
   calculateMitigatedDamage,
   calculateTrapDamage,
   calculateXpGain,
+  UNDERLORD_BOSS_CONFIG,
+  isUnderlordBoss,
+  calculateUnderlordDamage,
+  canCastTorchFlare,
 } from '../utils/rules';
 
 describe('Combat Engine Hardening & Math Boundaries', () => {
@@ -92,6 +96,73 @@ describe('Combat Engine Hardening & Math Boundaries', () => {
     it('guarantees at least 1 XP even for low or degenerate values', () => {
       expect(calculateXpGain(1)).toBe(1);
       expect(calculateXpGain(0)).toBe(1);
+    });
+  });
+
+  describe('The Underlord (Ace of Spades Boss) Rebalance', () => {
+    it('identifies Ace of Spades as the Underlord Boss', () => {
+      expect(isUnderlordBoss('spades', 'A')).toBe(true);
+      expect(isUnderlordBoss('spades', 'K')).toBe(false);
+      expect(isUnderlordBoss('hearts', 'A')).toBe(false);
+    });
+
+    it('defines canonical Two-Phase Underlord stats', () => {
+      expect(UNDERLORD_BOSS_CONFIG.phase1Hp).toBe(20);
+      expect(UNDERLORD_BOSS_CONFIG.phase1Atk).toBe(8);
+      expect(UNDERLORD_BOSS_CONFIG.phase2Hp).toBe(20);
+      expect(UNDERLORD_BOSS_CONFIG.phase2Atk).toBe(10);
+      expect(UNDERLORD_BOSS_CONFIG.phaseTransitionDmg).toBe(3);
+      expect(UNDERLORD_BOSS_CONFIG.minPierceDmg).toBe(3);
+    });
+
+    it('calculates Phase 1 mitigated damage normally with armor', () => {
+      // 8 ATK vs 3 DEF = 5 DMG
+      expect(calculateUnderlordDamage(1, 8, 3)).toBe(5);
+      // 8 ATK vs 10 DEF = 1 DMG minimum
+      expect(calculateUnderlordDamage(1, 8, 10)).toBe(1);
+    });
+
+    it('enforces Crushing Ruin (minimum 3 pierce damage) in Phase 2', () => {
+      // 10 ATK vs 4 DEF = 6 DMG
+      expect(calculateUnderlordDamage(2, 10, 4)).toBe(6);
+      // 10 ATK vs 8 DEF = max(3, 10 - 8) = 3 DMG
+      expect(calculateUnderlordDamage(2, 10, 8)).toBe(3);
+      // 10 ATK vs 99 DEF = max(3, 10 - 99) = 3 DMG
+      expect(calculateUnderlordDamage(2, 10, 99)).toBe(3);
+    });
+  });
+
+  describe('canCastTorchFlare Tactical Restrictions', () => {
+    it('disallows casting before Level 4', () => {
+      const res = canCastTorchFlare({ level: 3, torch: 4 });
+      expect(res.canCast).toBe(false);
+      expect(res.reason).toBe('REQUIRES LVL 4');
+    });
+
+    it('disallows casting with fewer than 2 torch fuel', () => {
+      const res = canCastTorchFlare({ level: 4, torch: 1 });
+      expect(res.canCast).toBe(false);
+      expect(res.reason).toBe('NEED 2 TORCH');
+    });
+
+    it('enforces 1 cast per combat encounter limit', () => {
+      const res = canCastTorchFlare({ level: 4, torch: 4, hasUsedInCombat: true });
+      expect(res.canCast).toBe(false);
+      expect(res.reason).toBe('1X PER BATTLE');
+    });
+
+    it('disallows casting against Underlord Phase 1 (Void Shielded)', () => {
+      const res = canCastTorchFlare({ level: 4, torch: 4, bossPhase: 1 });
+      expect(res.canCast).toBe(false);
+      expect(res.reason).toBe('VOID SHIELDED');
+    });
+
+    it('permits casting against regular foes or Underlord Phase 2 once per combat', () => {
+      const regularRes = canCastTorchFlare({ level: 4, torch: 4, hasUsedInCombat: false });
+      expect(regularRes.canCast).toBe(true);
+
+      const bossP2Res = canCastTorchFlare({ level: 4, torch: 4, hasUsedInCombat: false, bossPhase: 2 });
+      expect(bossP2Res.canCast).toBe(true);
     });
   });
 });

@@ -49,6 +49,8 @@ export interface CombatState {
   monsterMaxHp: number;
   monsterAtk: number;
   isAmbush: boolean;
+  bossPhase?: 1 | 2;
+  hasUsedTorchFlare?: boolean;
 }
 
 export type GameStage = 

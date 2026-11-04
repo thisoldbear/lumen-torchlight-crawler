@@ -1,4 +1,4 @@
-# 🕯️ LUMEN: The Torchlight Catacombs (v1.2.0)
+# 🕯️ LUMEN: The Torchlight Catacombs (v1.3.0)
 *A 3-Bit Retro 52-Card Spatial Dungeon Crawler built with Vite + React + TypeScript.*
 
 [![Repository](https://img.shields.io/badge/GitHub-thisoldbear%2Flumen--torchlight--crawler-1c62e8?style=flat&logo=github)](https://github.com/thisoldbear/lumen-torchlight-crawler)
@@ -37,9 +37,9 @@ The game is playable in two formats:
   - **♣ Clubs (Traps & Timber):** Disarm hazards to salvage wood for **+2 Torch**.
   - **♦ Diamonds (Treasure & Armory):** Collect Gold, equip Swords (+ATK), Shields (+DEF), and visit Wandering Merchants.
   - **♥ Hearts (Sanctuaries & Potions):** Drink or pocket potions (+HP), rest at Campfires (+HP & +Torch), and discover Revive Wards.
-- **RPG Progression & Floor Transitions:** Defeat monsters to earn XP and level up (Lvl 1 $\to$ 4), permanently increasing Max HP, Base ATK, Base DEF, and unlocking the *Torch Flare* spell. Descending to a new floor allows you to catch your breath and fully restore HP to maximum.
+- **RPG Progression & Floor Transitions:** Defeat monsters to earn XP and level up (Lvl 1 $\to$ 4), permanently increasing Max HP, Base ATK, Base DEF, and unlocking the *Torch Flare* spell. Descending to a new floor allows you to catch your breath with field dressing (+10 HP).
 - **In-Game Guide:** Click the **"Read the guide"** button on the starting draft screen at any time to open the in-game `🕯️ GUIDE 🕯️` overlay.
-- **Final Boss:** The **Ace of Spades ♠ (The Underlord)** waits at the exit stairs of Floor 5.
+- **Final Boss:** The **Ace of Spades ♠ (The Underlord)** awaits as a thrilling two-phase showdown at the exit stairs of Floor 5.
 
 ---
 

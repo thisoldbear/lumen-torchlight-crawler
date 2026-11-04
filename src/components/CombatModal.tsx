@@ -1,6 +1,7 @@
 import React from 'react';
 import { CombatState, PlayerState } from '../types';
 import { RetroCard } from './RetroCard';
+import { canCastTorchFlare } from '../utils/rules';
 
 interface CombatModalProps {
   combat: CombatState;
@@ -22,7 +23,12 @@ export const CombatModal: React.FC<CombatModalProps> = ({
   const monsterHpPercent = Math.max(0, (combat.monsterHp / combat.monsterMaxHp) * 100);
   const playerAtk = player.baseAtk + (player.weapon?.bonus || 0);
   const playerDef = player.baseDef + (player.armor?.bonus || 0);
-  const canFlare = player.torch >= 2 && player.level >= 4;
+  const flareStatus = canCastTorchFlare({
+    level: player.level,
+    torch: player.torch,
+    hasUsedInCombat: combat.hasUsedTorchFlare,
+    bossPhase: combat.bossPhase,
+  });
 
   return (
     <div
@@ -57,6 +63,42 @@ export const CombatModal: React.FC<CombatModalProps> = ({
           </div>
         )}
 
+        {/* Boss Phase Banner */}
+        {combat.bossPhase === 1 && (
+          <div
+            style={{
+              backgroundColor: '#162233',
+              border: '2px solid var(--c-cyan)',
+              color: 'var(--c-cyan)',
+              fontSize: '8px',
+              padding: '5px',
+              marginBottom: '8px',
+              fontWeight: 'bold',
+              letterSpacing: '1px',
+            }}
+          >
+            🛡️ THE UNDERLORD: PHASE 1 (SLUMBERING SOVEREIGN)
+          </div>
+        )}
+
+        {combat.bossPhase === 2 && (
+          <div
+            style={{
+              backgroundColor: '#2e1216',
+              border: '2px solid var(--c-red)',
+              color: 'var(--c-red)',
+              fontSize: '8px',
+              padding: '5px',
+              marginBottom: '8px',
+              fontWeight: 'bold',
+              letterSpacing: '1px',
+              boxShadow: '0 0 8px rgba(240, 37, 56, 0.4)',
+            }}
+          >
+            ⚠️ THE UNDERLORD: PHASE 2 (THE VOID UNLEASHED)
+          </div>
+        )}
+
         <div style={{ fontSize: '12px', color: 'var(--c-red)', marginBottom: '8px' }}>
           ⚔️ COMBAT ENGAGED ⚔️
         </div>
@@ -84,6 +126,11 @@ export const CombatModal: React.FC<CombatModalProps> = ({
 
             <div style={{ fontSize: '8px', color: 'var(--c-yellow)' }}>
               STRIKE POWER: {combat.monsterAtk} DMG
+              {combat.bossPhase === 2 && (
+                <span style={{ color: 'var(--c-red)', display: 'block', fontSize: '7px', marginTop: '2px' }}>
+                  ⚔️ CRUSHING RUIN (MIN 3 DMG)
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -126,12 +173,14 @@ export const CombatModal: React.FC<CombatModalProps> = ({
 
           <button
             onClick={onTorchFlare}
-            disabled={!canFlare}
+            disabled={!flareStatus.canCast}
             className="pixel-btn btn-yellow"
             style={{ padding: '10px 4px', fontSize: '8px' }}
-            title={canFlare ? 'Unleash burst of flame' : 'Requires Lvl 4 & 2 Torch'}
+            title={flareStatus.canCast ? 'Unleash burst of flame' : flareStatus.reason}
           >
-            🔥 TORCH FLARE (-2🕯️)
+            {flareStatus.canCast
+              ? '🔥 TORCH FLARE (-2🕯️)'
+              : `🔥 FLARE (${flareStatus.reason})`}
           </button>
 
           <button

@@ -113,14 +113,14 @@ describe('Progression, Scoring & Navigation Hardening', () => {
     });
   });
 
-  describe('calculateFloorTransitionHeal Rules', () => {
-    it('restores health back to full when descending into a new floor', () => {
-      const res = calculateFloorTransitionHeal(10, 20);
-      expect(res.newHp).toBe(20);
+  describe('calculateFloorTransitionHeal Field Dressing Rules (+10 HP)', () => {
+    it('restores up to +10 HP when descending into a new floor', () => {
+      const res = calculateFloorTransitionHeal(8, 20);
+      expect(res.newHp).toBe(18);
       expect(res.healed).toBe(10);
     });
 
-    it('heals the exact difference when HP is partially depleted', () => {
+    it('clamps heal to maxHp when within 10 HP of maximum', () => {
       const res = calculateFloorTransitionHeal(17, 20);
       expect(res.newHp).toBe(20);
       expect(res.healed).toBe(3);
@@ -132,16 +132,16 @@ describe('Progression, Scoring & Navigation Hardening', () => {
       expect(res.healed).toBe(0);
     });
 
-    it('safely handles higher maxHp values from level ups and blessings', () => {
+    it('safely heals +10 on higher maxHp values from level ups and blessings without full-clearing damage', () => {
       const res = calculateFloorTransitionHeal(12, 34);
-      expect(res.newHp).toBe(34);
-      expect(res.healed).toBe(22);
+      expect(res.newHp).toBe(22);
+      expect(res.healed).toBe(10);
     });
 
     it('handles negative or zero HP boundary conditions safely', () => {
       const res = calculateFloorTransitionHeal(-5, 20);
-      expect(res.newHp).toBe(20);
-      expect(res.healed).toBe(20);
+      expect(res.newHp).toBe(10);
+      expect(res.healed).toBe(10);
     });
   });
 });

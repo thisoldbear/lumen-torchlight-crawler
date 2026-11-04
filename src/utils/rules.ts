@@ -97,13 +97,74 @@ export interface FloorHealResult {
   healed: number;
 }
 
-export function calculateFloorTransitionHeal(currentHp: number, maxHp: number): FloorHealResult {
+export function calculateFloorTransitionHeal(
+  currentHp: number,
+  maxHp: number,
+  healAmount: number = 10
+): FloorHealResult {
   const safeHp = Math.max(0, currentHp);
   const safeMax = Math.max(0, maxHp);
+  const newHp = Math.min(safeMax, safeHp + Math.max(0, healAmount));
   return {
-    newHp: safeMax,
-    healed: Math.max(0, safeMax - safeHp),
+    newHp,
+    healed: newHp - safeHp,
   };
+}
+
+// The Underlord (Floor 5 Ace of Spades) Boss Configuration & Mechanics
+export interface UnderlordBossConfig {
+  phase1Hp: number;
+  phase1Atk: number;
+  phase2Hp: number;
+  phase2Atk: number;
+  phaseTransitionDmg: number;
+  minPierceDmg: number;
+}
+
+export const UNDERLORD_BOSS_CONFIG: UnderlordBossConfig = {
+  phase1Hp: 20,
+  phase1Atk: 8,
+  phase2Hp: 20,
+  phase2Atk: 10,
+  phaseTransitionDmg: 3,
+  minPierceDmg: 3,
+};
+
+export function isUnderlordBoss(cardSuit: string, cardRank: string | number): boolean {
+  return cardSuit === 'spades' && cardRank === 'A';
+}
+
+export function calculateUnderlordDamage(
+  phase: 1 | 2,
+  incomingAtk: number,
+  defense: number = 0
+): number {
+  if (phase === 2) {
+    // Crushing Ruin: Attacks bypass armor with minimum 3 unmitigated damage
+    return Math.max(UNDERLORD_BOSS_CONFIG.minPierceDmg, incomingAtk - Math.max(0, defense));
+  }
+  return calculateMitigatedDamage(incomingAtk, defense);
+}
+
+export function canCastTorchFlare(params: {
+  level: number;
+  torch: number;
+  hasUsedInCombat?: boolean;
+  bossPhase?: 1 | 2;
+}): { canCast: boolean; reason?: string } {
+  if (params.level < 4) {
+    return { canCast: false, reason: 'REQUIRES LVL 4' };
+  }
+  if (params.torch < 2) {
+    return { canCast: false, reason: 'NEED 2 TORCH' };
+  }
+  if (params.hasUsedInCombat) {
+    return { canCast: false, reason: '1X PER BATTLE' };
+  }
+  if (params.bossPhase === 1) {
+    return { canCast: false, reason: 'VOID SHIELDED' };
+  }
+  return { canCast: true };
 }
 
 // Wandering Merchant Catalog & Cart Logic
